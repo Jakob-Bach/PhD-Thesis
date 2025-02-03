@@ -1,0 +1,135 @@
+\RequirePackage{amsthm} % theorems, definitions etc.; needs to be loaded before "newtxmath", which is loaded by SDQ class
+
+\documentclass[format=a4-sdq]{sdqdiss} % format used in dissertations of our chair
+% SDQ class and template from https://gitlab.kit.edu/kit/kastel/sdq/dokumentvorlagen/sdq-dissertations-vorlage (commit e8956c532bc75db4c245cb3304325436bfc4d281 "Anpassung Titelseite auf Prüfungsordnung" (Jun 12, 2023))
+
+%%% Packages %%%
+
+\PassOptionsToPackage{hyphens}{url} % "url" is loaded by "hyperref", but we need to set an option for it (allow line breaks after "-" character)
+
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e} % pseudo-code
+%\usepackage{amsmath} % mathematical symbols and equations; loaded by "newtxmath", which is loaded by SDQ class
+%\usepackage{amssymb} % mathematical symbols; alternatively provided by "newtxmath", which is loaded by SDQ class
+%\usepackage{amsthm} % theorems, definitions etc.; loaded before SDQ class
+\usepackage[ngerman,english]{babel} % switching languages
+\usepackage[citestyle=numeric,style=numeric,backend=biber]{biblatex}
+\usepackage{booktabs} % nicely formatted tables (with top, mid, and bottom rule)
+\usepackage{csquotes} % expected by "babel", which is used for language switching
+%\usepackage{enumitem} % nicely formatted enumerations; loaded by SDQ class
+%\usepackage[T1]{fontenc} % was loaded in SDQ template
+%\usepackage{graphicx} % plots; loaded by "wallpaper", which is loaded by SDQ class
+\usepackage{multirow} % cells spanning multiple rows in tables
+\usepackage{pdfpages} % for the licensing disclaimer on the back of the title page
+\usepackage{subcaption} % figures with multiple sub-figures and sub-captions
+%\usepackage{url} % \url command; loaded by "hyperref"
+%\usepackage{hyperref} % links and URLs; loaded by "pdfx"
+\usepackage[a-1a]{pdfx} % create a PDF/A document (still not fully compliant, but more than before)
+
+%%% Meta-data %%%
+
+% see also "dissertation.xmpdata" for meta-data attached to the PDF file
+\title{Leveraging Constraints for User-Centric Feature Selection}
+\author{Jakob Bach}
+\date{} % printed below author, is disabled if empty (but not if commented out); unused in dissertations of our chair
+%\subject{} % printed above title; unused in dissertations of our chair
+
+%%% Setup %%%
+
+\pdfsuppresswarningpagegroup=1 % hide warning for multiple PDFs (e.g., figures) being on one page
+
+\addbibresource{references.bib}
+
+\setlength{\algomargin}{1em} % prevents pseudo-code algorithms' line numbers from appearing on margins of page
+
+\renewcommand{\floatpagefraction}{0.5} % reset minimum fraction of a float-only page that must be occupied by floats to the LaTeX default; SDQ class uses a higher threshold, which causes some of our float-only pages (using [p] as position) to be moved to end of chapter since they are not filled up to this threshold
+
+\newcommand{\Abstract}[1][Abstract]{\chapter*{#1}\addcontentsline{toc}{chapter}{#1}\markboth{#1}{#1}} % from SDQ template; just a special kind of chapter
+
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+
+%%% Title page %%%
+
+\subtitle{
+	\vskip2em
+	Zur Erlangung des akademischen Grades eines\\[1em]
+	{\Large Doktors der Ingenieurwissenschaften}\\[1em]
+	von der KIT-Fakultät für Informatik des\\
+	Karlsruher Instituts für Technologie (KIT)\\[.5em]
+	genehmigte\\[.3em]
+	{\Large Dissertation}
+}
+
+\author{
+	\normalsize{von}\\
+	{\LARGE Jakob Bach}\\
+}
+
+\publishers{%
+	\flushleft\small
+	Tag der mündlichen Prüfung: 20. Januar 2025\\
+	1. Referent/Referentin: T.T.-Prof. Dr. Peer Nowack\\
+	2. Referent/Referentin: Prof. Dr. Ira Assent\\
+}
+
+\begin{document}
+
+%%% Front matter %%%
+
+\pagenumbering{alph} % supresses "destination with the same identifier" warnings that are caused by title page being numered arabic by default (though not visible), same as main matter (which causes clash for "hyperref")
+\selectlanguage{ngerman}
+\maketitle
+
+% license page downloaded from https://www.bibliothek.kit.edu/downloads/PDF/CC_Lizenzvermerke.zip
+\includepdf{CC-BY_Vermerk_A4_2017_4.0_EN.pdf}
+
+\frontmatter % uses roman page numbers
+
+\selectlanguage{english}
+\Abstract[Acknowledgments]{\input{sections/acknowledgments}}
+\Abstract{\input{sections/abstract-en}}
+
+\selectlanguage{ngerman}
+\Abstract[Zusammenfassung]{\input{sections/abstract-de}}
+
+\selectlanguage{english}
+
+\tableofcontents
+
+%\listoffigures % used in most, but not all dissertations of our chair
+%\listoftables % used in most, but not all dissertations of our chair
+
+%%% Main part %%%
+
+\mainmatter % uses arabic page numbers
+
+\input{sections/introduction}
+\input{sections/fundamentals}
+\input{sections/related-work}
+
+\input{sections/syn}
+\input{sections/ms}
+\input{sections/afs}
+\input{sections/csd}
+
+\input{sections/conclusions}
+\input{sections/future-work}
+
+\printbibliography
+
+%%% Back matter %%%
+
+\appendix
+
+\input{sections/appendix}
+
+%%% Only for "vorgelegte" (review), but not "genehmigte" (final) version of dissertation: CV and publication list %%%
+
+%\selectlanguage{ngerman}
+%\input{cv}
+%
+%\selectlanguage{english}
+%\input{publications}
+
+\end{document}

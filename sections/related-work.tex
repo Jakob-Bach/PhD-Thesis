@@ -1,0 +1,257 @@
+\chapter{Related Work}
+\label{sec:related-work}
+
+In this chapter, we discuss related work.
+We organize this discussion according to the two main research gaps we address (cf.~Section~\ref{sec:introduction:research-gaps}):
+Section~\ref{sec:related-work:constraints} covers approaches for integrating constraints and domain knowledge, while Section~\ref{sec:related-work:alternatives} examines approaches for finding alternative solutions.
+In both sections, we elaborate on the fields of feature selection and subgroup discovery in detail before reviewing other related fields.
+
+\section{Integrating Constraints and Domain Knowledge}
+\label{sec:related-work:constraints}
+
+In this section, we discuss related work on considering constraints and domain knowledge in feature selection
+(cf.~Section~\ref{sec:related-work:constraints:feature-selection}), subgroup discovery
+(cf.~Section~\ref{sec:related-work:constraints:subgroup-discovery}), and other related fields
+(cf.~Section~\ref{sec:related-work:constraints:other-fields}).
+Constraints for finding alternatives follow in Section~\ref{sec:related-work:alternatives}.
+
+\subsection{Feature Selection}
+\label{sec:related-work:constraints:feature-selection}
+
+\paragraph{Constraint types and approaches}
+
+Despite the number and variety of existing feature-selection methods (cf.~Section~\ref{sec:fundamentals:feature-selection:methods}), considering constraints and domain knowledge is less well-researched.
+Existing work typically has a narrower scope than ours since it tends to focus only on one feature-selection method and one constraint type rather than pursuing a more general approach.
+There is work on cost constraints~\cite{jagdhuber2020cost, momeni2021cafs, paclik2002feature, plasberg2009feature, zhang2016learning} and cardinality constraints~\cite{khushaba2011feature, lee2018effective, serpico2001new, yang2015budget}.
+Feature selection with predefined groups of features has been studied as well, though mainly specific to linear prediction models, e.g., group lasso and its variants~\cite{friedman2010note, jacob2009group, simon2013sparse, yuan2006model, zhao2006grouped}.
+As a more general work, \cite{groves2015toward}~presents four wrapper-feature-selection methods that can theoretically support arbitrary constraint types.
+However, their evaluation only employs a narrow set of constraint types, related to lagged temporal features or a hierarchy of feature groups.
+Also, their wrapper approaches treat constraints as a black box, i.e., they only check whether constraints are satisfied and correspondingly exclude invalid candidate feature sets from the search.
+In contrast, we primarily use white-box solvers to consider constraints in the optimization.
+\cite{neutatz2021enforcing}~introduces a wrapper approach supporting arbitrary constraint types and feature-selection methods.
+However, they also implement constraints as black-box functions.
+Apart from feature-set size, their constraints do not refer to feature sets per se but metrics for the whole machine-learning system, e.g., accuracy, fairness, or training time.
+Further, the constraints are not integrated into feature selection but are checked after training and evaluating a prediction model with the selected features.
+
+\paragraph{Other notions of constrained feature selection}
+
+Some subfields of data mining refer to `constraints' in combination with `feature selection' but mean different problems than we do.
+First, feature selection with constraints is studied in semi-supervised learning~\cite{hijazi2021active, rostami2020novel, sheikhpour2017survey, zhang2008constraint}.
+However, the constraints there express relationships between data objects, not between features.
+For example, constraints may state whether two data objects belong to the same class, without assigning a class label.
+Second, constraints play a role in unsupervised feature selection~\cite{lu2018unsupervised, zhang2019nonlinear, zhang2020unsupervised}.
+These constraints do not directly express user needs on feature sets but help find a low-dimensional representation of the data.
+Third, there is constraint-based feature selection that builds on Bayesian network learning~\cite{lagani2017feature}.
+It does not involve user-defined constraints but conditional independence constraints between features, which are automatically learned and propagated.
+
+\subsection{Subgroup Discovery}
+\label{sec:related-work:constraints:subgroup-discovery}
+
+\paragraph{White-box formulations}
+
+To consider constraints in subgroup discovery, we provide an SMT formulation of the problem (cf.~Section~\ref{sec:csd:approach:smt}) and tackle it with a corresponding solver.
+To our knowledge, this formulation is novel.
+There are a few other white-box formulations of particular variants of subgroup discovery, e.g., constraint-programming formulations of \textsc{Discriminative Itemset Mining}~\cite{guns2011itemset, koccak2020exploiting} and \textsc{Relevant Subgroup Discovery}~\cite{koccak2020exploiting}, and integer-programming formulations of the \textsc{Maximum Box} problem~\cite{eckstein2002maximum}, \textsc{Maximum $\alpha$-Pattern} problem~\cite{bonates2008maximum}, and the \textsc{Box Search} problem~\cite{louveaux2014combinatorial}.
+Additionally, there are also white-box formulations for other prediction models~\cite{ignatiev2021reasoning} that share some similarities with subgroup descriptions, e.g., formulations in propositional logic (SAT) for decision trees, decision sets, and decision lists~\cite{narodytska2018learning, shati2021sat, yu2021learning}.
+All previously mentioned works address different problem definitions than we do, e.g., use additional constraints but not the specific constraint types we analyze.
+Also, their evaluations differ from ours.
+For example, they do not compare against existing heuristic subgroup-discovery methods.
+
+\paragraph{Constraint types}
+
+There is work on considering different constraint types in subgroup discovery.
+Typically, constraints are integrated into algorithmic search methods rather than formulated declaratively for solver-based optimization.
+\cite{meeng2021real} mentions three common constraint types:
+lower bounds on subgroup quality, lower bounds on the number of subgroup members, and upper bounds on the search depth.
+The latter influences the number of features used.
+Several subgroup-discovery methods employ quality-based pruning to reduce the search space, e.g., using optimistic estimates in exhaustive search~\cite{atzmueller2015subgroup, atzmueller2009fast, grosskreutz2009subgroup}.
+However, such automatically determined bounds on subgroup quality are not user-defined constraints.
+\cite{atzmueller2006methodological, atzmueller2005exploiting, atzmueller2007using} provide a taxonomy and examples for knowledge-based constraint types in subgroup discovery.
+\cite{atzmueller2007using}~expresses domain knowledge declaratively with the logic programming language Prolog but does not use a solver for optimization.
+
+\paragraph{Feature-cardinality constraints}
+
+Feature-cardinality constraints (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) are one of the two constraint types we analyze in Chapter~\ref{sec:csd}.
+While feature cardinality is a well-known metric for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}, our SMT formulation of this constraint type is novel.
+\cite{li2015efficient}~formulates a quadratic program to select non-redundant features for subgroups, but with real-valued feature weights as decision variables and only as a subroutine within an algorithmic search.
+Two alternatives to feature-cardinality constraints are constraints~\cite{lavrac2006relevancy} or post-processing~\cite{friedman1999bump} to eliminate irrelevant features.
+
+Several works on subgroup discovery use a feature-cardinality constraint in their experiments~\cite{arzamasov2022pedagogical, lavrac2006relevancy, leeuwen2012diverse, leeuwen2013discovering, mampaey2012efficient}, but there is a lack of studies that analyze the impact of different feature-cardinality thresholds on different subgroup-discovery methods broadly and systematically.
+\cite{friedman1999bump, lemmerich2010fast, proencca2022robust} compare multiple feature-cardinality thresholds for one subgroup-discovery method each, while \cite{helal2016subgroup} compares multiple subgroup-discovery methods for one feature-cardinality threshold.
+\cite{meeng2021real} evaluates three subgroup-discovery methods and four feature-cardinality thresholds but mainly focuses their evaluation on comparing strategies for handling numeric data.
+Also, they use fewer and lower-dimensional datasets than we do.
+Further, they do not compare to an unconstrained setting.
+
+\subsection{Other Fields}
+\label{sec:related-work:constraints:other-fields}
+
+\paragraph{Data mining and machine learning}
+
+Besides feature selection and subgroup discovery, working with constraints is a research area for various subfields of data mining and machine learning \cite{grossi2017survey}, e.g., automated machine learning~\cite{neutatz2023automl}, clustering \cite{dao2013declarative, dao2024review}, explainable AI~\cite{deutch2019constraints, gorji2022sufficient, mothilal2020explaining, shrotri2022constraint}, and pattern mining \cite{ng1998exploratory, silva2016constrained}.
+There is also work in the other direction, i.e., using machine-learning techniques in constraint solving~\cite{popescu2022overview}.
+
+\paragraph{Materials science}
+
+Since we conduct a case study on constrained feature selection in materials science (cf.~Chapter~\ref{sec:ms}), we also review related work in this field.
+In materials science, various feature-selection methods have already been applied~\cite{agrawal2014exploration, imbalzano2018automatic, janet2017resolving}, but without considering constraints.
+At the same time, researchers argue for the integration of domain knowledge in machine learning~\cite{mangal2018comparative, wagner2016theory}.
+To this end, \cite{childs2019embedding, ramprasad2017machine} survey machine-learning approaches in materials science, some of which use domain knowledge when creating new features rather than when selecting them.
+For example, physical laws can guide which interaction terms should be created from the original features.
+As another example, `fingerprint' feature vectors for describing materials have implicit physical constraints on feature values~\cite{huan2015accelerated}.
+Apart from constraints, one can directly involve domain experts in feature selection.
+\cite{liu2020multi} lets domain experts rate the importance of features and combines these manual ratings with several automated feature-selection steps.
+Such an approach requires domain knowledge about the usefulness of individual features, while our constraints express knowledge about the relationships between features.
+
+\paragraph{Software engineering}
+
+There are approaches for constrained feature selection in software engineering~\cite{benavides2010automated, galindo2019automated, harman2014search}.
+Despite technical similarities, the semantics of \emph{feature} and \emph{feature-set quality} differ from our work, which limits the comparability of empirical studies.
+
+A \emph{feature} in software engineering is a characteristic of a software product, not a column in a tabular dataset (cf.~Section~\ref{sec:fundamentals:feature-selection:problem}).
+\emph{Feature selection} then aims at configuring a software system, which may even be a machine-learning system~\cite{aloisio2023democratizing}.
+\emph{Feature models} express logical relationships, i.e., constraints, between features, often forming a hierarchical structure.
+Further, \emph{feature attributes} express properties like component costs, memory requirements, etc.
+These properties form the base for further constraints or one or several target functions \cite{guo2011genetic, henard2015combining, sayyad2013value}.
+Typical approaches to find feature sets include sampling \cite{oh2017finding}, constraint solving \cite{white2010automated}, adapting general-purpose optimization techniques \cite{guo2011genetic}, and combining satisfiability solving with general-purpose optimization~\cite{guo2014scaling, guo2019smtibea, henard2015combining}.
+
+Empirical studies on feature selection in software engineering often use feature models with predefined constraints from repositories like LVAT \cite{lvat} and SPLOT \cite{mendonca2009splot}.
+Only some works also generate constrained feature models for a more systematic evaluation.
+\cite{guo2011genetic, ochoa2019constraint, thum2009reasoning} iteratively generate constraints, randomly picking constraint types and the features to be used, similar to our study with random constraints (cf.~Chapter~\ref{sec:syn}).
+However, these works use generated constraints to evaluate new approaches for dealing with constraints, while we focus on evaluating the impact of constraints themselves.
+
+\section{Finding Alternative Solutions}
+\label{sec:related-work:alternatives}
+
+In this section, we discuss related work on finding alternative solutions in feature selection
+(cf.~Section~\ref{sec:related-work:alternatives:feature-selection}), subgroup discovery
+(cf.~Section~\ref{sec:related-work:alternatives:subgroup-discovery}), and other related fields
+(cf.~Section~\ref{sec:related-work:alternatives:other-fields}).
+
+\subsection{Feature Selection}
+\label{sec:related-work:alternatives:feature-selection}
+
+\paragraph{Conventional feature selection}
+
+Most feature-selection methods only yield one solution~\cite{borboudakis2021extending}, though some exceptions exist~\cite{emmanouilidis1999selecting, mueller2021feature, siddiqi2020genetic}.
+However, none of the cited approaches searches for alternatives in our sense.
+For example, they pursue different objectives and give users less control, e.g., do not guarantee the dissimilarity of alternatives.
+
+\paragraph{Ensemble feature selection}
+
+Ensemble feature selection~\cite{saeys2008robust, seijo2017ensemble} combines feature-selection results, e.g., obtained by different feature-selection methods or on different samples of the data.
+Fostering diverse feature sets may be a sub-goal to improve prediction performance~\cite{guru2018alternative, liu2019subspace, shekar2017diverse, woznica2012model}, but it is usually only an intermediate step.
+This focus differs from our notion of alternative feature sets, and users have less control over alternatives.
+
+\paragraph{Statistically equivalent feature sets}
+
+Methods for statistically equivalent feature sets~\cite{borboudakis2021extending, lagani2017feature} use statistical tests to determine features or feature sets that are equivalent for predictions.
+Our notion of alternatives differs in several aspects.
+In particular, building optimal alternatives from equivalent feature sets is not straightforward.
+There can be arbitrarily many equivalent feature sets, without an explicit quality-based ordering, while we provide a user-defined number of alternatives.
+Also, our alternatives need not have equivalent quality but should be optimal under constraints.
+Further, our dissimilarity threshold allows controlling the overlap between sets instead of eliminating all redundancies.
+
+\subsection{Subgroup Discovery}
+\label{sec:related-work:alternatives:subgroup-discovery}
+
+To our knowledge, alternative subgroup descriptions in the sense of this dissertation (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) are a novel concept.
+In particular, we \emph{maximize} the set similarity of contained data objects relative to a given subgroup while using a different subgroup description.
+In contrast, various existing approaches strive for alternatives in the sense of diverse or non-redundant sets of subgroups, which \emph{minimize} the overlap of contained data objects without constraints on the description.
+After presenting such techniques for \emph{subgroup-set selection}, we discuss approaches focusing on subgroup descriptions.
+
+\paragraph{Subgroup-set selection}
+
+Since subgroups only cover specific regions of the data, it is natural to search for multiple subgroups to cover multiple regions; see~\cite{atzmueller2015subgroup} for an overview of subgroup-set selection.
+The \emph{covering} approach supports any subgroup-discovery method by removing all data objects contained in previous subgroups and repeating subgroup discovery~\cite{friedman1999bump}.
+Alternatively, one may reweigh~\cite{gamberger2002expert, lavrac2004subgroup} or resample~\cite{scholz2005sampling} data objects based on their subgroup membership.
+Other subgroup-discovery methods specifically search for multiple solutions simultaneously~\cite{leeuwen2012diverse, leeuwen2013discovering, lemmerich2010fast, lucas2018ssdp+, proencca2022robust}.
+The notion of subgroup quality then typically goes beyond predictive quality like WRAcc and involves metrics for the diversity~\cite{belfodil2019fssd, leeuwen2012diverse, leeuwen2013discovering, lucas2018ssdp+} and number~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} of subgroups.
+One may also filter redundant subgroups as a post-processing step~\cite{bosc2018anytime, grosskreutz2012enhanced, hudson2023subgroup, leeuwen2013discovering}.
+
+\paragraph{Description-based diverse subgroup-set selection}
+
+\cite{leeuwen2012diverse} introduces six strategies to foster diversity between subgroups.
+Two strategies refer to subgroup descriptions:
+The first excludes subgroup descriptions that have the same quality and differ in only one condition from an existing subgroup description.
+The second uses a global upper bound on how often a feature may be selected in a set of subgroup descriptions.
+Both these strategies give users less control over the overlap of subgroup descriptions than we do.
+Further, \cite{leeuwen2012diverse} optimizes subgroup quality in a simultaneous beam search.
+In contrast, we search for alternative descriptions sequentially, optimize similarity to the original subgroup, and consider a solved-based search method in addition to heuristic search.
+
+\paragraph{Diverse top-k characteristics lists}
+
+\cite{lopez2023discovering}~introduces the notion of \emph{diverse top-k characteristic lists}, which is a set of lists, each containing multiple patterns, e.g., subgroups.
+Within each list, the subgroups should be diverse in terms of data objects contained.
+Further, exactly the same subgroup description must not appear in two lists.
+However, any other partial overlap of descriptions is allowed, which is less specific than our definition.
+
+\paragraph{Equivalent subgroup descriptions of minimal length}
+
+\cite{boley2009non}~introduces the notion of \emph{equivalent subgroup descriptions of minimal length}, which is stricter than our notion of alternative subgroup descriptions.
+In particular, the former descriptions need to cover exactly the same set of data objects instead of maximizing similarity.
+Further, a subset of the original feature set should be found, instead of using a different feature set subject to a dissimilarity constraint.
+The authors prove $\mathcal{NP}$-hardness, which influenced our proof of Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}, and propose two algorithms for their problem but do not pursue a solver-based search.
+
+\paragraph{Redescription mining}
+
+Redescription mining aims to find pairs or sets of descriptions that cover exactly or approximately the same data objects~\cite{galbrun2017redescription, ramakrishnan2004turning}.
+We pursue a similar goal but search for alternative descriptions sequentially instead of simultaneously.
+Also, we have a target variable while redescription mining is unsupervised~\cite{ramakrishnan2004turning}.
+Further, redescription mining works with different feature-set dissimilarity criteria than we do~\cite{galbrun2017redescription, gallo2008finding, mihelcic2023complexity, parida2005redescription}, and the language for redescriptions may be more complex than for subgroups~\cite{galbrun2017redescription, gallo2008finding}.
+Finally, most existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}, though~\cite{guns2013kpattern} provides a constraint-programming formulation.
+\cite{mihelcic2023complexity} shows that several variants of redescription mining are $\mathcal{NP}$-hard.
+
+\subsection{Other Fields}
+\label{sec:related-work:alternatives:other-fields}
+
+\paragraph{Clustering}
+
+Finding alternative solutions has been addressed extensively in the field of clustering. \cite{bailey2014alternative} gives a taxonomy and describes corresponding algorithms.
+On a high level, this work inspired our notions of alternatives in feature selection and subgroup discovery.
+Nevertheless, the concrete problem definitions for alternatives are fundamentally different.
+First, the notion of dissimilarity differs, as we focus on feature sets rather than limiting the assignments of data objects to clusters~\cite{bae2006coala, bae2010clustering}.
+Second, using constraints is only one of several approaches to obtain alternative clusterings.
+Third, we are in a supervised prediction scenario (cf.~Section~\ref{sec:fundamentals}) while clustering is unsupervised.
+
+\paragraph{Subspace clustering and subspace search}
+
+Finding multiple feature sets is part of subspace clustering~\cite{gunnemann2009detection, hu2018subspace, mueller2009relevant} and subspace search~\cite{fouche2021efficient, nguyen20134s, trittenbach2019dimension}.
+These approaches strive to improve the results of data-mining algorithms by using subspaces, i.e., feature sets, rather than all features.
+Some approaches explicitly try to remove redundancy between subspaces~\cite{gunnemann2009detection, hu2018subspace, nguyen20134s} or foster subspace diversity~\cite{fouche2021efficient, trittenbach2019dimension}.
+However, these subspace approaches differ from alternative feature selection and alternative subgroup descriptions in at least one of the following aspects:
+First, they pursue different optimization objectives, e.g., a different notion of quality.
+Second, definitions of subspace redundancy may consider data objects and feature values instead of only binary feature-selection decisions.
+Third, users may have less control over the dissimilarity of alternatives, e.g., only a regularization parameter rather than a hard threshold.
+
+\paragraph{Explainable artificial intelligence (XAI)}
+
+Alternative explanations in XAI can provide additional insights into predictions, enable users to develop and test different hypotheses, appeal to different kinds of users, and foster trust in the predictions~\cite{kim2021multi, wang2019designing}.
+In contrast, significantly different explanations for the same prediction may raise doubts about how meaningful the explanations are~\cite{jain2019attention}.
+Finding diverse explanations has been studied for various explainers, e.g., for counterfactuals~\cite{dandl2020multi, karimi2020model, mohammadi2021scaling, mothilal2020explaining, russell2019efficient, wachter2017counterfactual}, criticisms~\cite{kim2016examples}, and semifactual explanations~\cite{artelt2022even}.
+There are several approaches to foster diversity, e.g., ensembling different kinds of explanations~\cite{silva2019produce}, considering multiple local minima~\cite{wachter2017counterfactual}, using a search algorithm that maintains diversity~\cite{dandl2020multi}, extending the optimization objective~\cite{artelt2022even, kim2016examples, mothilal2020explaining}, or introducing constraints~\cite{karimi2020model, mohammadi2021scaling, russell2019efficient}.
+Of the various mentioned approaches, only~\cite{artelt2022even, mohammadi2021scaling, mothilal2020explaining} introduce a parameter to control the diversity of solutions.
+Of these three works, only~\cite{mohammadi2021scaling} offers a user-friendly dissimilarity threshold in~$[0,1]$, while the other two approaches employ a regularization parameter in the objective.
+
+Despite similarities, the previously mentioned XAI techniques tackle different problems than we do.
+In particular, they provide local explanations, i.e., aim at predictions for individual data objects, while we focus on the global quality of feature sets.
+For example, counterfactual explanations~\cite{guidotti2022counterfactual, stepin2021survey, verma2020counterfactual} alter feature \emph{values} \emph{as little as possible} to produce an alternative prediction \emph{outcome}.
+In contrast, alternative feature sets might alter the feature \emph{selection} \emph{significantly} while trying to maintain the original prediction \emph{quality}.
+
+\paragraph{Rashomon sets}
+
+A Rashomon set is a set of prediction models that reach a certain, e.g., close-to-optimal, prediction performance~\cite{fisher2019all}.
+Despite similar performance, these models may still assign different feature importance scores, leading to different explanations~\cite{laberge2023partial}.
+Thus, Rashomon sets may yield partial information about alternative feature sets.
+However, approaches for Rashomon sets do not explicitly search for alternative feature sets as a whole but focus on the range of each feature's importance over prediction models.
+Further, our notion of alternatives is broader, as it is not tied to model-based feature importance.
+
+\paragraph{Number partitioning}
+
+Special cases of alternative feature selection resemble existing number-partitioning problems from theoretical computer science.
+Several restrictions of our problem are necessary to draw this connection, e.g., univariate feature-set quality and each feature being selected exactly once (cf.~Section~\ref{sec:afs:approach:complexity:univariate}).
+Without restricting set sizes, a corresponding problem is called \textsc{Multi-Way Number Partitioning} or \textsc{Multiprocessor Scheduling}.
+It has multiple problem formulations~\cite{garey2003computers, korf2010objective, lawrinenko2017identical}, $\mathcal{NP}$-hardness results~\cite{garey2003computers, korf2009multi}, parameterized-complexity results~\cite{mnich2018parameterized}, exact algorithms~\cite{haouari2008maximizing, schreiber2018optimal, walter2017improved}, and approximation algorithms~\cite{alon1998approximation, deuermeyer1982scheduling, sahni1976algorithms, woeginger1997polynomial}.
+When restricting the set sizes, a related problem is called \textsc{Balanced Number Partitioning} or \textsc{K-Partitioning}.
+Again, there are $\mathcal{NP}$-hardness results~\cite{babel1998thek, he2003kappa} as well as approximation algorithms~\cite{chen2016efficient, kellerer2011a32approximation, lawrinenko2018reduction, michiels2012computer, zhang2011heuristic}.
+Our $\mathcal{NP}$-hardness results and approximation algorithms for univariate alternative feature selection (cf.~Section~\ref{sec:afs:approach}) build on these existing works.
+However, alternative feature selection generally has a much broader scope than number partitioning, allowing for more sophisticated objectives, additional parametrization options, and evaluation with prediction scenarios rather than only summing numbers.

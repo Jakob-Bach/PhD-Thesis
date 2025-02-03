@@ -1,0 +1,75 @@
+\chapter{Future Work}
+\label{sec:future-work}
+
+In this section, we outline potential directions for future research.
+
+\paragraph{Integrating more conventional methods}
+
+Our notions of constraints and alternatives are orthogonal to conventional methods for feature selection and subgroup discovery.
+While we successfully showed how to integrate constraints, we could naturally only evaluate a combination with a few existing methods.
+Thus, there is room for integrating constraints into further methods.
+E.g., we implemented only one procedure to find alternatives for wrapper feature selection (cf.~Section~\ref{sec:afs:approach:objectives:black-box}) and did not adapt embedded feature selection, which does not admit a generic solution procedure (cf.~Section~\ref{sec:afs:approach:objectives:embedding}).
+
+\paragraph{Further problem encodings and solvers}
+
+In each chapter, we focused on one problem encoding and solver, i.e., SMT via \emph{Z3} (cf.~Chapters~\ref{sec:syn}, \ref{sec:ms}, and~\ref{sec:csd}) or 0-1 integer linear programming via \emph{SCIP} (cf.~Chapter~\ref{sec:afs}).
+One could analyze further problem encodings, e.g., using \textsc{MaxSAT}, and compare additional solvers.
+For subgroup discovery, we assumed numerical features and a binary target (cf.~Section~\ref{sec:fundamentals:subgroup-discovery:problem}).
+To support more datasets, one could adapt the encoding to multi-valued categorical features and continuous targets.
+
+\paragraph{Heuristic search}
+
+For alternative feature selection, we developed heuristic search methods and showed membership in the complexity class~$\mathcal{APX}$ for univariate feature qualities (cf.~Equation~\ref{eq:fs:univariate-filter}) under certain conditions (cf.~Proposition~\ref{prop:afs:approximation-apx}).
+One could attempt to tighten the quality bounds we derived or show membership in a narrower complexity class.
+Additionally, one could develop heuristic search methods for other notions of feature-set quality.
+For subgroup discovery, we described how to integrate feature-cardinality constraints and alternative subgroup descriptions into heuristic search methods (cf.~Sections~\ref{sec:csd:approach:cardinality:heuristics} and~\ref{sec:csd:approach:alternatives:heuristics}).
+However, proving quality-approximation guarantees is still open.
+
+\paragraph{Further definitions of alternatives}
+
+One could vary the definition of alternatives, e.g., the set-dissimilarity measure (cf.~Equations~\ref{eq:afs:dice} and~\ref{eq:csd:constraint-dissimilarity}).
+However, one should ensure that the corresponding search method supports the desired change, e.g., requiring linearity for integer linear programming or antimonotonicity for specific heuristic search methods. 
+For simultaneous alternatives, there are different options to aggregate the quality of feature sets (cf.~Section~\ref{sec:afs:approach:constraints:multiple}).
+For subgroup discovery, one could analyze solver-based search for alternatives in the sense of covering different data objects, as used in related work (cf.~Section~\ref{sec:related-work:alternatives:subgroup-discovery}), rather than covering the same data objects differently, as we did.
+
+\paragraph{Soft constraints}
+
+We only employed hard constraints, i.e., all constraints had to be satisfied.
+As we observed, this can result in reduced feature-set quality or even an infeasible solution.
+With soft constraints, users could attach individual penalties to each constraint violation and thereby specify how to trade off constraint satisfaction against feature-set quality.
+Alternatively, one could treat constraint satisfaction as another objective besides feature-set quality and apply multi-objective optimization.
+The set of Pareto-optimal solutions may allow users to compare different constraint-quality trade-offs.
+
+\paragraph{Time complexity}
+
+Our various $\mathcal{NP}$-hardness results made assumptions on the problem definition, e.g., parametrization of the search for alternatives.
+One could attempt to obtain further hardness results for other scenarios.
+For alternative feature selection, our analysis (cf.~Section~\ref{sec:afs:approach:complexity:univariate}) assumed univariate feature qualities (cf.~Equation~\ref{eq:fs:univariate-filter}).
+Results for other feature-selection methods may differ.
+In the univariate scenario, we obtained $\mathcal{NP}$-hardness for min-aggregation with feature-set overlap (cf.~Proposition~\ref{prop:afs:complexity-no-partitioning-min-constrained-k}) and polynomial runtime for sum-aggregation without overlap (cf.~Proposition~\ref{prop:afs:complexity-partitioning-sum}).
+However, an analysis of sum-aggregation with overlap remains open.
+For subgroup discovery, we showed $\mathcal{NP}$-hardness of finding alternative subgroup descriptions (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}, \ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}, and~\ref{prop:csd:complexity-alternatives-np}) but focused on scenarios without feature-set overlap.
+Additionally, our proofs assumed a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) when searching alternative subgroup descriptions.
+One could examine scenarios without this constraint type.
+
+\paragraph{Case studies}
+
+While we conducted a case study for constrained feature selection (cf.~Chapters~\ref{sec:ms}), our other experiments used generic benchmark datasets and quantitative evaluation metrics (cf.~Chapters~\ref{sec:syn}, \ref{sec:afs}, and~\ref{sec:csd}).
+In particular, we focused on uncovering general trends rather than dataset-specific insights.
+Since all the methods introduced in this dissertation are domain-independent, one could also employ them in domain-specific case studies and interpret the corresponding results qualitatively, i.e., from the domain perspective.
+
+\paragraph{User-friendly systems}
+
+We made all our generally applicable methods available for reuse via Python packages.
+Also, we implemented specific evaluation routines to create figures and tables.
+However, users may prefer an application with a graphical user interface to run analyses and inspect results themselves.
+In particular, an interactive tool could ease trying out different constraints or varying the parameters for alternatives.
+For constrained feature selection, one would need to design a user-friendly way to formulate constraints.
+For all methods, runtime is an essential concern for interactivity.
+This point could be addressed with solver timeouts, fast heuristics, and runtime estimates shown to users.
+
+\paragraph{Constrained feature engineering}
+
+In this dissertation, we took the datasets as-is, i.e., assuming all features were engineered already.
+However, one could integrate constraints into feature engineering as well, steering the creation of new features rather than the selection of existing ones.
+For example, one could desire only to engineer features with specific characteristics or limit the combination of certain feature-engineering operators.

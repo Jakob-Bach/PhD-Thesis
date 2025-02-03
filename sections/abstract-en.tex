@@ -1,0 +1,47 @@
+Feature selection in machine learning aims to identify the variables in a dataset that are most useful for predictions.
+Feature-selection methods are ubiquitous for a variety of reasons:
+They can increase prediction quality, reduce hardware requirements, and ease understanding of the data.
+However, existing feature-selection methods do not satisfy user needs in certain scenarios:
+(1)~Users may want to integrate domain knowledge into feature selection.
+For example, established laws or hypotheses from the domain can make selecting certain feature combinations unintuitive for users.
+In contrast, existing feature-selection methods typically ignore domain knowledge or only support particular types of it.
+(2)~Multiple, differently composed feature sets may yield good predictions.
+Such alternatives may provide users with different explanations for predictions.
+In contrast, existing feature-selection methods typically yield just one feature set.
+
+In this thesis, we make feature selection more user-centric by introducing constraints on the composition of feature sets.
+Integrating such constraints into existing feature-selection methods is challenging since constraints may limit admissible feature sets arbitrarily, particularly when combining different constraint types.
+In addition, constraints may negatively affect the feature sets' predictive quality.
+Our contribution is fourfold:
+
+(1) We analyze the impact of constraints on feature-selection results.
+First, we formalize constrained feature selection as an optimization problem.
+Our basic problem definition is independent of the feature-selection method.
+To consider constraints, we propose employing a Satisfiability Modulo Theories (SMT) solver, which allows the use and combination of a wide range of constraint types.
+Second, we evaluate the impact of constraints empirically.
+We observe a trade-off between the strength of the constraints and the predictive quality of the selected features.
+However, the effect is non-linear, i.e., strong constraints can still result in high feature-set quality.
+
+(2) We use constraints to express and compare scientific hypotheses in a materials-science use case.
+In particular, we collaborate with domain experts to formulate corresponding constraint types.
+Our experiments demonstrate that some constraint types lead to differently composed feature sets with high quality, which motivates our following work.
+
+(3) We use constraints to find alternative feature sets, i.e., feature sets that differ from others while simultaneously optimizing feature-set quality.
+First, we formalize alternative feature selection with 0-1 integer linear constraints.
+Users can control the number and dissimilarity of alternatives with one parameter each.
+Second, we discuss how to integrate existing notions of feature-set quality as the objective of the optimization problem.
+Third, we analyze the time complexity of this problem and show $\mathcal{NP}$-hardness, for a simple notion of feature-set quality already.
+Fourth, we introduce heuristic approximations for the latter.
+Fifth, we evaluate our approaches with five feature-selection methods.
+We observe that our approaches can find high-quality alternative feature sets, and the two parameters allow users to exercise control over the quality.
+
+(4) We use constraints to find sparse and alternative feature sets for subgroups.
+Subgroup-discovery methods search interesting regions in a dataset that admit concise descriptions, e.g., a logical conjunction of bounds on feature values.
+First, we formalize subgroup discovery as an SMT optimization problem.
+Second, we formalize two user-centric constraint types:
+(a) We make subgroup descriptions sparse by limiting the number of features used.
+(b) We propose the problem of finding alternative subgroup descriptions, which use different features to describe a given subgroup.
+Third, we prove $\mathcal{NP}$-hardness of optimization with either constraint type.
+Fourth, we describe how to integrate both constraint types into existing heuristic subgroup-discovery methods.
+Fifth, we evaluate solver-based and heuristic subgroup discovery empirically.
+We observe that heuristic search methods are not only fast but also yield high-quality subgroups, even with the two constraint types.

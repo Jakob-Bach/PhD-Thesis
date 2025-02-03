@@ -1,0 +1,391 @@
+\chapter{Appendix}
+\label{sec:appendix}
+
+In this chapter, we provide supplementary materials for Chapter~\ref{sec:afs} (cf.~Section~\ref{sec:appendix:afs}) and Chapter~\ref{sec:csd} (cf.~Section~\ref{sec:appendix:csd}).
+
+\section{\nameref*{sec:afs}}
+\label{sec:appendix:afs}
+
+In this section, we provide supplementary materials for Chapter~\ref{sec:afs}.
+Section~\ref{sec:appendix:afs:univariate-complete-optimization-problem} provides complete definitions of the alternative-feature-selection problem (cf.~Section~\ref{sec:afs:approach:constraints}) for the univariate objective (cf.~Equation~\ref{eq:fs:univariate-filter}).
+Section~\ref{sec:appendix:afs:proofs} contains proofs for the complexity analysis with the univariate objective (cf.~Section~\ref{sec:afs:approach:complexity:univariate}).
+
+\subsection{Complete Optimization Problems for the Univariate Objective}
+\label{sec:appendix:afs:univariate-complete-optimization-problem}
+
+In this section, we provide complete specifications of the alternative-feature-selection problem for sequential and simultaneous search as a 0-1 integer linear problem.
+In particular, we combine all relevant definitions and equations from Section~\ref{sec:afs:approach}.
+We use the objective of univariate filter feature selection (cf.~Equation~\ref{eq:fs:univariate-filter}).
+The corresponding feature qualities $q(\cdot)$ are constants in the optimization problem.
+Further, we use the Dice dissimilarity (cf.~Equations~\ref{eq:afs:dice} and~\ref{eq:afs:dice-rearranged-equal-size}) to measure feature-set dissimilarity for alternatives.
+The dissimilarity threshold~$\tau \in [0,1]$ is a user-defined constant.
+Finally, we assume fixed, user-defined feature-set sizes~$k \in \mathbb{N}$.
+
+\paragraph{Sequential-search problem}
+
+In the sequential case (cf.~Definition~\ref{def:afs:alternative-feature-selection-sequential} and Equation~\ref{eq:afs:afs-sequential}), only one feature set~$F_s$ is variable in the optimization problem, while the existing feature sets $F_{\bar{s}} \in \mathbb{F}$ with their selection vectors $\bar{s}$ are constants.
+%
+\begin{equation}
+	\begin{aligned}
+		\max_s &\quad & Q_{\text{uni}}(s,X,y) &= \sum_{j=1}^{n} q(X_{\cdot{}j},y) \cdot s_j \\
+		\text{subject to:} &\quad \forall F_{\bar{s}} \in \mathbb{F}: & \sum_{j=1}^n s_j \cdot \bar{s}_j &\leq (1 - \tau) \cdot k \\
+		&\quad & \sum_{j=1}^n s_j &= k \\
+		&\quad & s &\in \{0,1\}^n
+	\end{aligned}
+	\label{eq:afs:afs-sequential-complete}
+\end{equation}
+%
+\paragraph{Simultaneous-search problem}
+
+In the simultaneous case (cf.~Definition~\ref{def:afs:alternative-feature-selection-simultaneous} and Equation~\ref{eq:afs:afs-simultaneous}), all feature sets are variable.
+$a \in \mathbb{N}_0$ denotes the number of alternatives, which corresponds to the number of feature sets minus one.
+Next, we introduce auxiliary variables to linearize products between decision variables (cf.~Equation~\ref{eq:afs:product-linear}).
+Finally, we use sum-aggregation (cf.~Equation~\ref{eq:afs:afs-simultaneous-sum-objective}) over alternatives in the objective here.
+%
+\begin{equation}
+	\begin{aligned}
+		\max_{s^{(0)}, \dots, s^{(a)}} &\quad & \sum_l Q_{\text{uni}}(s^{(l)},X,y) &= \sum_l \sum_j q(X_{\cdot{}j},y) \cdot s^{(l)}_j\\
+		\text{subject to:} &\quad \forall l_1~\forall l_2: & \sum_j t^{(l_1,l_2)}_j &\leq (1 - \tau) \cdot k \\
+		&\quad \forall l_1~\forall l_2~\forall j: & t^{(l_1,l_2)}_j &\leq s^{(l_1)}_j \\
+		&\quad \forall l_1~\forall l_2~\forall j: & t^{(l_1,l_2)}_j &\leq s^{(l_2)}_j \\
+		&\quad \forall l_1~\forall l_2~\forall j: & 1 + t^{(l_1,l_2)}_j &\geq s^{(l_1)}_j + s^{(l_2)}_j \\
+		&\quad \forall l: & \sum_j s^{(l)}_j &= k \\
+		&\quad \forall l: & s^{(l)} &\in \{0,1\}^n \\
+		&\quad \forall l_1~\forall l_2: & t^{(l_1,l_2)} &\in \{0,1\}^n \\
+		\text{with indices:} &\quad & l &\in \{0, \dots, a\} \\
+		&\quad & l_1 &\in \{1, \dots, a\} \\
+		&\quad & l_2 &\in \{0, \dots, l_1-1\} \\
+		&\quad & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:afs:afs-simultaneous-complete}
+\end{equation}
+
+\subsection{Proofs}
+\label{sec:appendix:afs:proofs}
+
+In this section, we provide proofs for propositions from Section~\ref{sec:afs:approach:complexity:univariate}, i.e., complexity results for alternative feature selection with univariate feature qualities.
+
+\subsubsection{Proof of Proposition~\ref{prop:afs:complexity-incomplete-partitioning-min-constrained-k}}
+\label{sec:appendix:afs:proofs:complexity-incomplete-partitioning-min-constrained-k}
+
+\begin{proof}
+	Let~$I$ be an arbitrary problem instance of the simultaneous-search problem with min-aggregation, univariate feature qualities, a complete-partitioning scenario, and a fixed feature-set size~$k$ (cf.~Proposition~\ref{prop:afs:complexity-partitioning-min-constrained-k}).
+	We add a new feature~$f'$ to~$I$ and keep the parameters $a$, $k$, and $\tau$ as before, obtaining an instance~$I'$ of the incomplete-partitioning scenario since one feature will not be selected.
+	We set the quality~$q'$ of~$f'$ to be lower than all other feature qualities in~$I$.
+	Since the univariate objective monotonically increases in the selected feature qualities, selecting feature~$f'$ in a solution of~$I'$ does not have any benefit since~$f'$ would replace a feature with higher quality.
+	If~$f'$ is not selected, this solution of~$I'$ also solves~$I$.
+	However, if the qualities of the alternatives are not equal, $f'$ might still be chosen in a set that does not have the minimum quality of all sets since only the latter determines the objective value (cf.~Example~\ref{ex:afs:min-aggregation}).
+	In that case, we replace $f'$ with the remaining unselected feature; the objective value remains the same, and the solution becomes valid for~$I$.
+	Thus, in any case, we can easily transform a solution for~$I'$ to a solution for~$I$.
+	
+	Overall, an algorithm for incomplete partitioning can solve arbitrary complete-partitioning instances with negligible computational overhead.
+	Thus, a polynomial-time algorithm for incomplete partitioning could also solve complete partitioning polynomially.
+	However, the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:afs:complexity-partitioning-min-constrained-k}), so incomplete partitioning has to be $\mathcal{NP}$-hard.
+	Since checking a solution for incomplete partitioning needs only polynomial time, we obtain membership in $\mathcal{NP}$ and thereby $\mathcal{NP}$-completeness.
+\end{proof}
+
+\subsubsection{Proof of Proposition~\ref{prop:afs:complexity-no-partitioning-min-constrained-k}}
+\label{sec:appendix:afs:proofs:complexity-no-partitioning-min-constrained-k}
+
+\begin{proof}
+	Let~$I$ be an arbitrary problem instance of the simultaneous-search problem with min-aggregation, univariate feature qualities, a complete-partitioning scenario, the Dice dissimilarity (cf.~Equation~\ref{eq:afs:dice}) as~$d(\cdot)$, and a fixed feature-set size~$k$ (cf.~Proposition~\ref{prop:afs:complexity-partitioning-min-constrained-k}).
+	We create a new problem instance~$I'$ by adding a new feature~$f'$ and increasing the feature-set size to $k' = k + 1$.
+	Further, we set $\tau' = (k' - 1) / k'$, thereby allowing an overlap of at most one feature between feature sets.
+	Also, we choose~$f'$ to have a considerably higher quality~$q'$ than all other features.
+	Our goal is to force the selection of~$f'$ in all feature sets, no matter which other features are selected.
+	One possible choice is $q' = \sum_{j=1}^n q_j + \varepsilon$ for a small $\varepsilon \in \mathbb{R}_{> 0}$
+	This quality~$q'$ of~$f'$ is higher than of any feature set not containing it.
+	Thus, a solution for~$I'$ contains~$f'$ in each feature set, while the remaining features are part of exactly one feature set.
+	Hence, we can remove~$f'$ to get feature sets of size~$k = k' - 1$ that constitute an optimal solution for the original problem instance~$I$.
+	
+	This transformation shows how an algorithm for problem instances with $\tau < 1$ can help solve arbitrary problem instances with $\tau = 1$.
+	Given the $\mathcal{NP}$-completeness of the latter problem (cf.~Proposition~\ref{prop:afs:complexity-partitioning-min-constrained-k}), we obtain $\mathcal{NP}$-hardness of the former.
+\end{proof}
+%
+One can transfer this reduction from $\tau' = (k' - 1) / k'$ to all other $\tau > 0$.
+In particular, for a given~$k$, there is only a finite number of $\tau$ values leading to different set overlaps, e.g., $\tau = \{0, 1/k, \dots, (k - 1) / k, 1\}$ for the Dice dissimilarity.
+The proof for the highest overlap except~$\tau=0$ requires creating an instance $I'$ with $\tau'= 1/k$ from an instance with $\tau = 1$.
+For this purpose, $k^2 - k$ features need to be added since $\tau' = k / k' = k / (k + k^2 -k) = 1/k$.
+I.e., $k$ out of $k' = k^2$ features need to form a complete partitioning, while the remaining $k^2 - k$~features occur in each feature set and will be removed after solving~$I'$.
+The number of features to be added is polynomial in~$k$ and thereby also polynomial in~$n$.
+
+\subsubsection{Proof of Proposition~\ref{prop:afs:complexity-partitioning-sum}}
+\label{sec:appendix:afs:proofs:complexity-partitioning-sum}
+
+\begin{proof}
+	We discuss the simultaneous-search problem (cf.~Definition~\ref{def:afs:alternative-feature-selection-simultaneous}) with sum-aggregation (cf.~Equation~\ref{eq:afs:afs-simultaneous-sum-objective}) first.
+	We leverage the monotonicity of the univariate objective with sum-aggregation.
+	In particular, this objective cannot decrease when selecting features of higher quality.
+	Thus, we order all features decreasingly by their quality, which yields the complexity of~$O(n \cdot \log n)$.
+	Next, we pick features in this order without replacement and assign them to sets until we have the user-defined number of alternatives with the user-defined feature-set sizes.
+	Apart from observing cardinality constraints, the actual assignment of the selected features to sets does not matter quality-wise since swapping features between sets does not change the summed objective.
+	Thus, one can fill the feature sets in an arbitrary order.
+	Each assignment runs in $O(1)$, e.g., using arrays to store feature-set membership, yielding $O(n)$ for all features.
+	Without cardinality constraints, only the number of alternatives needs to be satisfied.
+	Further, if all features need to be selected, i.e., for a complete partitioning, one need not sort the features.
+	Finally, if only a small fraction of features needs to be selected, one might slightly improve complexity to $O(k \cdot n)$ by iteratively picking the maximum instead of sorting all qualities.
+
+	For the sequential-search problem (cf.~Definition~\ref{def:afs:alternative-feature-selection-sequential}), we conduct the same quality-sorting procedure.
+	In contrast to the simultaneous-search problem, the actual assignment of features to sets matters since the sets have an explicit order.
+	In particular, each alternative should get the remaining highest-quality features until its user-defined size is reached.
+	The complexity is still dominated by sorting and therefore~$O(n \cdot \log n)$.
+\end{proof}
+
+\section{\nameref*{sec:csd}}
+\label{sec:appendix:csd}
+
+In this section, we supplement Chapter~\ref{sec:csd}.
+Section~\ref{sec:appendix:csd:milp-encoding} describes how to encode constrained subgroup discovery as a mixed integer linear program, complementing Section~\ref{sec:csd:approach:smt}.
+Section~\ref{sec:appendix:csd:proofs} contains proofs for complexity propositions from Section~\ref{sec:csd:approach}.
+
+\subsection{Encoding via Mixed Integer Linear Programming (MILP)}
+\label{sec:appendix:csd:milp-encoding}
+
+We start from the SMT formulation and introduce additional variables and constraints to linearize certain logical expressions.
+
+\paragraph{Unconstrained subgroup discovery}
+
+We keep all decision variables from the corresponding SMT formulation (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}):
+the binary variables~$b_i$ for subgroup membership and the real-valued bound variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$.
+The bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}) remain unchanged as well.
+Further, we retain the optimization objective, which already is linear in~$b_i$ (cf.~Equations~\ref{eq:csd:smt-wracc} and~\ref{eq:csd:smt-constraint-m-as-sum}).
+However, we need to linearize the logical AND ($\land$) operators in the definition of subgroup membership~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) by introducing auxiliary variables and further constraints.
+In particular, we supplement the variables~$b \in \{0, 1\}^m$ by $b^{\text{lb}} \in \{0, 1\}^{m \times n}$ and $b^{\text{ub}} \in \{0, 1\}^{m \times n}$.
+These new binary variables indicate whether a particular data object satisfies the lower or upper bound for a particular feature.
+Using linearization techniques for constraint satisfaction and AND operators from~\cite{mosek2022modeling}, we obtain the following set of constraints to replace Equation~\ref{eq:csd:smt-constraint-subgroup-membership}:
+
+\begin{equation}
+	\begin{aligned}
+		\forall i~\forall j: & & X_{ij} + m_j \cdot b^{\text{lb}}_{ij} &\leq \mathit{lb}_j - \varepsilon_j \\
+		\forall i~\forall j: & & \mathit{lb}_j &\leq X_{ij} + M_j \cdot \left(1 - b^{\text{lb}}_{ij} \right) \\
+		\forall i~\forall j: & & \mathit{ub}_j + m_j \cdot b^{\text{ub}}_{ij} &\leq X_{ij} - \varepsilon_j \\
+		\forall i~\forall j: & & X_{ij} &\leq \mathit{ub}_j + M_j \cdot \left(1 - b^{\text{ub}}_{ij} \right) \\
+		\forall i~\forall j: & & b_i &\leq b^{\text{lb}}_{ij} \\
+		\forall i~\forall j: & & b_i &\leq b^{\text{ub}}_{ij} \\
+		\forall i: & & \sum_{j=1}^{n} \left( b^{\text{lb}}_{ij} + b^{\text{ub}}_{ij} \right) &\leq b_i + 2n - 1 \\
+		\text{with indices:} & & i &\in \{1, \dots, m\} \\
+		& & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:milp-constraint-subgroup-membership}
+\end{equation}
+%
+The first two inequalities ensure that $b^{\text{lb}}_{ij} = 1$ if and only if $\mathit{lb}_j \leq X_{ij}$.
+The following two inequalities relate~$b^{\text{ub}}_{ij}$ to $X_{ij} \leq \mathit{ub}_j$.
+The values~$\varepsilon_j \in \mathbb{R}_{> 0}$ are small constants that turn strict inequalities into non-strict ones since a MILP solver may only support the latter.
+One possible choice is to sort all unique feature values and take the minimum difference between two consecutive values in that order.
+The values~$M_j \in \mathbb{R}_{> 0}$ and $m_j \in \mathbb{R}_{< 0}$ are large positive and negative constants, respectively.
+They help to connect real-valued and binary-valued expressions, compensating for the latter's smaller range.
+One choice for~$M_j$ is a value larger than the difference between the feature's minimum and maximum:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall j \in \{1, \dots, n\} & & M_j &:= 2 \cdot \left( \max_{i \in \{1, \dots, m\}} X_{ij} - \min_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+		\forall j \in \{1, \dots, n\} & & m_j &:= 2 \cdot \left( \min_{i \in \{1, \dots, m\}} X_{ij} - \max_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+	\end{aligned}
+	\label{eq:csd:milp-big-m}
+\end{equation}
+%
+In particular, the difference between the subgroup's bounds and arbitrary feature values must be smaller than $M_j$ and larger than $m_j$, unless the bounds are placed outside the feature's value range.
+Since the latter does not improve the subgroup's quality in any case, we prevent it with additional constraints on the bound variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall j \in \{1, \dots, n\} & & \min_{i \in \{1, \dots, m\}} X_{ij} &\leq \mathit{lb}_j &\leq \max_{i \in \{1, \dots, m\}} X_{ij} \\
+		\forall j \in \{1, \dots, n\} & & \min_{i \in \{1, \dots, m\}} X_{ij} &\leq \mathit{ub}_j &\leq \max_{i \in \{1, \dots, m\}} X_{ij} \\
+	\end{aligned}
+	\label{eq:csd:milp-constraint-bounds-in-range}
+\end{equation}
+%
+Finally, the last three inequalities in Equation~\ref{eq:csd:milp-constraint-subgroup-membership} tie $b^{\text{lb}}_{ij}$ and $b^{\text{ub}}_{ij}$ to $b_i$ and linearize the logical AND ($\land$) operators from Equation~\ref{eq:csd:smt-constraint-subgroup-membership}.
+In particular, these constraints ensure that a data object is a member of the subgroup, i.e., $b_i = 1$, if and only if all feature values of the data object observe the bounds, i.e., all corresponding $b^{\text{lb}}_{ij} = 1$ and $b^{\text{ub}}_{ij} = 1$.
+
+\paragraph{Feature-cardinality constraints}
+
+The feature-cardinality constraint of the SMT formulation (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}) already is a linear expression in the feature-selection variables~$s_j$.
+However, the constraints defining~$s_j$ (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}) contain a logical OR ($\lor$) operator and comparison ($<$) expressions.
+We linearize these constraints as follows:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall i~\forall j: & & 1 - b^{\text{lb}}_{ij} &\leq s^{\text{lb}}_j \\
+		\forall i~\forall j: & & 1 - b^{\text{ub}}_{ij} &\leq s^{\text{ub}}_j \\
+		\forall j: & & s^{\text{lb}}_j &\leq s_j \\
+		\forall j: & & s^{\text{ub}}_j &\leq s_j \\
+		\forall j: & & s_j &\leq 2m - \sum_{i=1}^{m} \left( b^{\text{lb}}_{ij} + b^{\text{ub}}_{ij} \right) \\
+		\text{with indices:} & & i &\in \{1, \dots, m\} \\
+		& & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:milp-constraint-feature-selection}
+\end{equation}
+%
+The first four inequalities ensure that a feature is selected, i.e., $s_j = 1$, if any data object's feature value lies outside the subgroup's bounds, i.e., any $b^{\text{lb}}_{ij} = 0$ or $b^{\text{ub}}_{ij} = 0$.
+The last inequality covers the other direction of the logical equivalence:
+If a feature is selected, then at least one data object's feature value lies outside the subgroup's bounds.
+
+\paragraph{Alternative subgroup descriptions}
+
+The objective function for alternative subgroup descriptions in the SMT formulation (cf.~Equation~\ref{eq:csd:smt-hamming}) is already linear.
+We only need to replace the logical negation ($\lnot$) operator:
+%
+\begin{equation}
+	\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{1}{m} \cdot \Big( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \left( 1 - b_i^{(a)} \right) \Big)
+	\label{eq:csd:mip-hamming}
+\end{equation}
+%
+The same replacement also applies to the dissimilarity constraints (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}):
+%
+\begin{equation}
+	\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \left(1 - s^{(a)}_j \right) \geq \min \left( \tau_{\text{abs}},~k^{(l)} \right)
+	\label{eq:csd:mip-constraint-dissimilarity}
+\end{equation}
+%
+Otherwise, this expression already is linear as well.
+
+\paragraph{Implementation}
+
+Our published code (cf.~Section~\ref{sec:introduction:materials}) contains a MILP implementation for unconstrained and feature-cardinality-constrained subgroup discovery.
+We use the package \emph{OR-Tools}~\cite{perron2022or-tools} with \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
+However, in preliminary experiments, this implementation was (on average) slower than the SMT implementation or yielded worse subgroup quality in the same runtime.
+Further, it sometimes finished considerably after the prescribed timeout or ran out of memory after consuming dozens of gigabytes.
+Thus, we stuck to the SMT implementation for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+
+\subsection{Proofs}
+\label{sec:appendix:csd:proofs}
+
+In this section, we provide proofs for propositions from Section~\ref{sec:csd:approach}, particularly for the complexity results for subgroup discovery with a feature-cardinality constraint and for searching alternative subgroup descriptions.
+
+\subsubsection{Proof of Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}}
+\label{sec:appendix:csd:proofs:complexity-cardinality-np-perfect-subgroup}
+
+\begin{proof}
+	Let~$I$ be an arbitrary instance of the decision problem \textsc{Set Covering}~\cite{karp1972reducibility}.
+	$I$ consists of a set of elements~$E = \{e_1, \dots, e_m\}$, a set of sets~$\mathbb{S} = \{S_1,  \dots, S_n\}$ with $E = \bigcup_{S \in \mathbb{S}} S$, and a cardinality threshold~$k \in \mathbb{N}$.
+	\textsc{Set Covering} asks whether a subset $\mathbb{C} \subseteq \mathbb{S}$ exists with $|\mathbb{C}| \leq k$ and $E = \bigcup_{S \in \mathbb{C}} S$, i.e., a subset of~$\mathbb{S}$ which contains (= covers) each element from~$E$ in at least one set and consist of at most $k$~sets.
+	
+	We transform~$I$ into an instance~$I'$ of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
+	To this end, we define a binary dataset~$X \in \{0, 1\}^{(m + 1) \times n}$, prediction target~$y \in \{0, 1\}^{m+1}$, and retain the number of sets~$k \in \mathbb{N}$ as feature cardinality~$k$.
+	In particular, data objects represent elements from~$E$, and features represent sets from~$\mathbb{S}$.
+	$X_{ij}$ denotes $e_i \in S_j$, i.e., membership of Element~$i$ in Set~$j$.
+	The additional index $i = m + 1$ represents a \emph{dummy element} that is not part of any set, so all its feature values are set to~0.
+	Further, we define the prediction target~$y \in \{0, 1\}^{m+1}$ as $y_{m+1} = 1$ and $y_i = 0$ for all other indices $i \in \{1, \dots, m\}$.
+	This prediction target represents whether an element should \emph{not} be covered by the set of sets~$\mathbb{C} \subseteq \mathbb{S}$.
+	In particular, all elements from~$E$ should be covered but not the new dummy element.
+	This `inverted' definition of the prediction target stems from the different nature of set covers and subgroup descriptions:
+	Set covers include elements from selected sets, with the empty cover $\mathbb{C} = \emptyset$ containing no elements.
+	There is a logical OR ($\lor$) respectively set union over the selected sets.
+	In contrast, subgroup descriptions exclude data objects based on bounds for their selected features, with the unrestricted subgroup containing all data objects.
+	There is a logical AND ($\land$) over the features' bounds.
+	
+	A perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) exactly replicates the prediction target~$y$ as subgroup membership.
+	Here, it only contains the data object representing the dummy element but no data objects representing elements from~$E$.
+	As all feature values of this dummy data object are~0, the subgroup description only consists of the bounds $\mathit{lb}_j = \mathit{ub}_j = 0$ for selected features and $\mathit{lb}_j = 0 < 1 = \mathit{ub}_j$ for unselected features.
+	Therefore, the data objects described by the selected features represent elements not contained in any selected set, which only applies to the dummy element.
+	Vice versa, all remaining data objects represent elements that are part of at least one selected set, which applies to all elements from~$E$.
+	Further, the feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) ensures that at most $k$~features are selected, which means that at most $k$~sets are selected.
+	Thus, the selected features of a perfect subgroup represent sets forming a valid set cover~$\mathbb{C}$.
+	In contrast, if no feature set of the desired size~$k$ can describe a perfect subgroup, then at least one data object with prediction target~$y_i = 0$ has to be a subgroup member.
+	Thus, at least one element is not contained in any set forming the set cover, so no valid set cover of size~$k$ exists.
+	
+	Overall, a solution to the instance~$I'$ of the perfect-subgroup discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) also solves the instance~$I$ of \textsc{Set Covering} ~\cite{karp1972reducibility} with negligible computational overhead.
+	In particular, an efficient algorithm for the former would also efficiently solve the latter.
+	However, since the latter problem is $\mathcal{NP}$-hard~\cite{karp1972reducibility}, the former is as well.
+	To be more precise, perfect-subgroup discovery with a feature-cardinality constraint resides in~$\mathcal{NP}$ and therefore is $\mathcal{NP}$-complete.
+	In particular, checking a solution induces a polynomial cost of~$O(m \cdot n)$, requiring one pass over the dataset to determine subgroup membership and feature selection.
+\end{proof}
+%
+This proof adapts the proof of \cite{boley2009non} for minimizing the feature cardinality of a given subgroup description.
+The latter reduces from the optimization problem \textsc{Minimum Set Cover}, while we use the decision problem \textsc{Set Covering}.
+Further, we replace the notion of a given subgroup description~\cite{boley2009non} with the notion of a perfect subgroup and employ lower and upper bounds instead of `feature=value' conditions.
+The latter difference is irrelevant for binary datasets, where selected features have $\mathit{lb}_j = \mathit{ub}_j$ and thereby implicitly select a feature value.
+The hardness result naturally extends to real-valued datasets.
+
+Note that the hardness reduction does not work for the special case $k=n$.
+For \textsc{Set Covering}, this case allows all sets to be selected, which trivially solves the problem.
+Vice versa, the unconstrained problem of perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) admits a polynomial-time solution (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}).
+
+\subsubsection{Proof of Proposition~\ref{prop:csd:complexity-cardinality-np}}
+\label{sec:appendix:csd:proofs:complexity-cardinality-np}
+
+\begin{proof}
+	Let~$I$ be an arbitrary instance of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
+	We transform~$I$ into an instance~$I'$ of the subgroup-discovery problem (cf.~Definition~\ref{def:csd:subgroup-discovery}) with the same constraint.
+	In particular, we define the objective as optimizing subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$ rather than searching for a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) that may or may not exist.
+	The other inputs of the problem instance ($X$, $y$, and $k$) remain the same.
+	
+	Based on the assumption we made on~$Q(\mathit{lb}, \mathit{ub}, X, y)$ in Proposition~\ref{prop:csd:complexity-cardinality-np}, the optimal solution for~$I'$ is a perfect subgroup if the latter exists.
+	Thus, if the optimal subgroup for~$I'$ is not perfect, then a perfect subgroup does not exist at all.
+	Checking whether a subgroup is perfect entails a cost of $O(m \cdot n)$, i.e., computing subgroup membership and checking for false positives and false negatives.
+	Overall, an algorithm for subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with the same constraint with negligible overhead.
+	Since the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}) and the former resides in the complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
+\end{proof}
+%
+Alternatively, one could reduce from the optimization problem \textsc{Maximum Coverage}~\cite{chekuri2004maximum}, similar to the proof for Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup} (cf.~Section~\ref{sec:appendix:csd:proofs:complexity-cardinality-np-perfect-subgroup}), which reduces from the decision problem \textsc{Set Covering}~\cite{karp1972reducibility}.
+In contrast to \textsc{Set Covering}, the $k \in \mathbb{N}$~selected subsets in \textsc{Maximum Coverage} need not cover all elements but should cover as many elements as possible.
+In subgroup discovery, the latter objective corresponds to a particular notion of subgroup quality:
+maximizing the number of true negatives or minimizing the number of false positives, i.e., excluding as many negative data objects from the subgroup as possible.
+This problem is minimal-optimal-recall-subgroup discovery (cf.~Definition~\ref{def:csd:minimal-optimal-recall-subgroup-discovery}).
+However, the latter's objective is simpler than WRAcc (cf.~Equation~\ref{eq:csd:wracc}), which we focus on in this dissertation.
+Our proof above is more general regarding the notion of subgroup quality but more narrow in the sense that it reduces from a search problem, assuming a particular value of the objective function, instead of an optimization problem.
+
+\subsubsection{Proof of Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}}
+\label{sec:appendix:csd:proofs:complexity-perfect-alternatives-np-perfect-subgroup}
+
+\begin{proof}
+	Let~$I$ be an arbitrary instance of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).	
+	We transform~$I$ into an instance~$I'$ of the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with the same constraint.
+	We retain the feature-cardinality threshold~$k \in \mathbb{N}$ and slightly modify the dataset~$X \in \mathbb{R}^{m \times n}$, as explained later.
+	
+	Based on the assumptions from Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}, we define the original subgroup for~$I'$ to be perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}), i.e., having subgroup membership $b^{(0)} = y$.
+	Also, we choose the dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ high enough that the alternative subgroup description may not select any features from the original subgroup description.
+	E.g., we can choose the deselection dissimilarity (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) and $\tau_{\text{abs}} = k$.
+	We need not even explicitly define the original feature selection since we must not select these features in the alternative anyway.
+	For the sake of completeness, we can define dataset~$X' \in \mathbb{R}^{m \times (n+k)}$ of problem instance~$I'$ as dataset~$X \in \mathbb{R}^{m \times n}$ of problem instance~$I$ with $k$ features added that equal the prediction target~$y$.
+	Choosing the bounds $\mathit{lb}_j = \mathit{ub}_j = 1$ on any of these extra features produces the desired original subgroup membership $b^{(0)} = y$.
+	We further assume that all extra features were selected in the original subgroup description but no actual features from~$X$ were, i.e., $\forall j \in \{1, \dots, n\}:~ s^{(0)}_j = 0$ and $\forall j \in \{n+1, \dots, n+k\}:~ s^{(0)}_j = 1$.
+	
+	A solution for problem instance~$I'$ also solves~$I$.
+	In particular, the perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) is a perfect subgroup since it perfectly replicates the original subgroup membership, which is perfect, i.e., $b^{(a)} = b^{(0)} = y$.
+	Due to the dissimilarity constraint, the alternative subgroup description only selects features from dataset~$X$, not those newly added to create~$X'$.
+	Finally, both~$I$ and~$I'$ use a feature-cardinality constraint with threshold~$k$.
+	Thus, if a perfect alternative subgroup description for~$I'$ exists, it also solves~$I$.
+	If it does not exist, then there is also no other perfect subgroup for~$I$.
+	
+	Thus, an efficient algorithm for the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) would also efficiently solve perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with the same constraint.
+	However, we already established that the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}).
+	Further, evaluating a solution for the former problem entails a polynomial cost of $O(m \cdot n)$ for checking constraints regarding bounds, feature cardinality, and dissimilarity, placing the problem in complexity class~$\mathcal{NP}$ and thereby making it $\mathcal{NP}$-complete.
+\end{proof}
+
+\subsubsection{Proof of Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}}
+\label{sec:appendix:csd:proofs:complexity-perfect-alternatives-np-imperfect-subgroup}
+
+\begin{proof}
+	Let~$I$ be an arbitrary instance of the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) and a perfect original subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}).
+	We transform~$I$ into an instance~$I'$ of the same problem but with an imperfect original subgroup.
+	In particular, we retain all problem inputs as-is except defining dataset~$X' \in \mathbb{R}^{(m + 1) \times n}$ of~$I'$ as dataset~$X \in \mathbb{R}^{m \times n}$ of~$I$ plus an additional data object with label $y_{m+1}=0$ but exactly the same feature values as an arbitrary existing data object~$X_{i\cdot}$ with $y_i=1$.
+	In particular, this data object prevents the existence of a perfect subgroup.
+	However, we assume this data object to be a member of the original subgroup, i.e., $b^{(0)}_{m+1} = 1$, while subgroup membership of all other data objects corresponds to their prediction target, i.e., $\forall i \in \{1, \dots, m\}:~ b^{(0)}_i = y_i$.
+	
+	If there is a solution for problem instance~$I'$, we can easily transform it to a solution for~$I$.
+	In particular, since the solution is a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}), it replicates~$b^{(0)}$, i.e., assigns all positive data objects of~$I$ to the alternative subgroup and places all negative data objects of~$I$ outside.
+	The additional data object is also a member of the alternative subgroup in~$I'$ but does not exist in~$I$.
+	Thus, the solution is a perfect subgroup for~$I$.
+	In contrast, if no solution for~$I'$ exists, then there is also no solution for~$I$.
+	
+	Overall, an efficient algorithm for perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) and an imperfect original subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) could be adapted to efficiently solve this problem for a perfect original subgroup.
+	However, since the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}), the former, which resides in $\mathcal{NP}$ as well, is also $\mathcal{NP}$-complete.
+\end{proof}
+
+\subsubsection{Proof of Proposition~\ref{prop:csd:complexity-alternatives-np}}
+\label{sec:appendix:csd:proofs:complexity-alternatives-np}
+
+\begin{proof}
+	Let~$I$ be an arbitrary instance of the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
+	We transform~$I$ into an instance~$I'$ of the alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with the same constraint.
+	In particular, we define the objective as optimizing the subgroup-membership similarity~$\text{sim}(\cdot)$ rather than asking for a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) that may or may not exist.
+	The other inputs of the problem instance remain the same.
+	
+	Based on the assumption on~$\text{sim}(\cdot)$ from Proposition~\ref{prop:csd:complexity-alternatives-np}, the optimal solution for~$I'$ is a perfect alternative subgroup description if the latter exists.
+	Thus, if the optimal alternative subgroup description for~$I'$ is not a perfect alternative, then a perfect alternative subgroup description does not exist.
+	Overall, an algorithm for alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with the same constraint with negligible overhead.
+	Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}) and the former resides in~$\mathcal{NP}$, the former is also $\mathcal{NP}$-complete.
+\end{proof}

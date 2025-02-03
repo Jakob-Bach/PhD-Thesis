@@ -1,0 +1,13 @@
+\documentclass[format=a4-sdq]{sdqdiss}
+
+\usepackage[ngerman]{babel}
+\usepackage[citestyle=numeric,style=numeric,backend=biber]{biblatex} % we don't have references in CV, but biber complains anyway if backend not defined
+\usepackage{csquotes} % expected by "babel"
+
+\begin{document}
+
+\pagenumbering{gobble} % disable page numbering
+
+\input{cv}
+
+\end{document}

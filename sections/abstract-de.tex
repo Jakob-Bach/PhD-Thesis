@@ -1,0 +1,51 @@
+Die Merkmalsauswahl (\emph{feature selection}) im maschinellen Lernen zielt darauf ab, die nützlichsten Variablen in einem Datensatz für Vorhersagen zu finden.
+Methoden zur Merkmalsauswahl sind aus vielfältigen Gründen allgegenwärtig:
+Sie können die Vorhersagequalität verbessern, Hardwareanforderungen verringern und das Verständnis der Daten erleichtern.
+Allerdings reichen bestehende Methoden zur Merkmalsauswahl in bestimmten Szenarien nicht aus, um Nutzerbedürfnisse zu befriedigen:
+(1)~Manche Nutzer möchten Domänenwissen in die Merkmalsauswahl miteinbeziehen.
+Beispielsweise können etablierte Gesetzmäßigkeiten oder Hypothesen aus der Domäne die Auswahl bestimmter Merkmalskombinationen unintuitiv für Nutzer machen.
+Bestehende Methoden zur Merkmalsauswahl ignorieren jedoch typischerweise Domänenwissen oder unterstützen nur bestimmte Arten davon.
+(2)~Mehrere, unterschiedlich zusammengesetzte Merkmalsmengen können gute Vorhersagen liefern.
+Solche Alternativen können Nutzern verschiedene Erklärungen für Vorhersagen bieten.
+Bestehende Methoden zur Merkmalsauswahl geben jedoch typischerweise nur eine Merkmalsmenge zurück.
+
+In dieser Dissertation machen wir die Merkmalsauswahl Nutzer-zentrierter, indem wir Nebenbedingungen (\emph{constraints}) für die Zusammensetzung der Merkmalsmengen einführen.
+Die Integration solcher Nebenbedingungen in bestehende Methoden zur Merkmalsauswahl ist herausfordernd, da Nebenbedingungen die zulässigen Merkmalsmengen beliebig einschränken können, insbesondere beim Kombinieren verschiedener Arten von Nebenbedingungen.
+Weiterhin können Nebenbedingungen die Vorhersagequalität der Merkmalsmengen negativ beeinflussen.
+Unsere Arbeit leistet vier wesentliche Beiträge:
+
+(1) Wir untersuchen den Einfluss von Nebenbedingungen auf die Ergebnisse der Merkmalsauswahl.
+Als Erstes formalisieren wir Merkmalsauswahl unter Nebenbedingungen als ein Optimierungsproblem.
+Unsere grundlegende Problemdefinition ist unabhängig von der Methode zur Merkmalsauswahl.
+Um Nebenbedingungen zu berücksichtigen, setzen wir einen Löser für Satisfiability-Modulo-Theories-(SMT)-Probleme ein.
+Dieser erlaubt die Nutzung und Kombination einer großen Bandbreite von Nebenbedingungen.
+Als Zweites werten wir den Einfluss von Nebenbedingungen empirisch aus.
+Wir beobachten einen Zielkonflikt zwischen der Stärke der Nebenbedingungen und der Vorhersagequalität der ausgewählten Merkmale.
+Dieser Effekt ist jedoch nichtlinear; insbesondere können starke Nebenbedingungen immer noch zu einer hohen Qualität der Merkmalsmenge führen.
+
+(2) Wir nutzen Nebenbedingungen zum Ausdrücken und Vergleichen wissenschaftlicher Hypothesen in einem materialwissenschaftlichen Anwendungsfall.
+Insbesondere kooperieren wir mit Domänenexperten, um die entsprechenden Nebenbedingungen zu formulieren.
+Unsere Experimente zeigen, dass manche Arten der Nebenbedingungen zu unterschiedlich zusammengesetzten Merkmalsmengen mit gleichzeitig hoher Qualität führen.
+Dieses Ergebnis motiviert unsere folgende Arbeit.
+
+(3) Wir nutzen Nebenbedingungen zum Finden alternativer Merkmalsmengen.
+Letztere sind Merkmalsmengen, die sich von anderen Merkmalsmengen unterscheiden und gleichzeitig eine möglichst hohe Qualität erreichen sollen.
+Als Erstes formalisieren wir alternative Merkmalsauswahl mittels ganzzahliger linearer Nebenbedingungen und binären Entscheidungsvariablen.
+Nutzer können die Anzahl und die Unterschiedlichkeit der Alternativen durch jeweils einen Parameter bestimmen.
+Als Zweites diskutieren wir, wie sich bestehende Konzepte für die Qualität von Merkmalsmengen als Zielfunktion des Optimierungsproblems integrieren lassen.
+Als Drittes untersuchen wir die Zeitkomplexität des Optimierungsproblems und zeigen, dass es bereits mit einer einfachen Zielfunktion $\mathcal{NP}$-schwer ist.
+Als Viertes stellen wir Näherungsheuristiken für diese Zielfunktion vor.
+Als Fünftes werten wir unsere Ansätze mit fünf Methoden zur Merkmalsauswahl aus.
+Wir beobachten, dass unsere Ansätze alternative Merkmalsmengen mit hoher Qualität finden können und dass die beiden Parameter den Nutzern Kontrolle über die Qualität geben.
+
+(4) Wir nutzen Nebenbedingungen, um kleine und alternative Merkmalsmengen für Untergruppen (\emph{subgroups}) zu finden.
+Methoden zur Untergruppenerkennung (\emph{subgroup discovery}) suchen in einem Datensatz nach interessanten Bereichen, die sich prägnant beschreiben lassen, beispielsweise mittels logischer Konjunktionen über Intervalle für Merkmalswerte.
+Als Erstes formalisieren wir Untergruppenerkennung als ein SMT-Optimierungsproblem.
+Als Zweites formalisieren wir zwei Nutzer-zentrierte Arten von Nebenbedingungen:
+(a)~Wir verkleinern die Beschreibungen von Untergruppen, indem wir die Zahl der genutzten Merkmale begrenzen.
+(b)~Wir definieren das Problem des Findens alternativer Untergruppenbeschreibungen.
+Letztere beschreiben eine gegebene Untergruppe mit anderen Merkmalen.
+Als Drittes beweisen wir, dass die Optimierung von Untergruppen mit beiden Arten von Nebenbedingungen $\mathcal{NP}$-schwer ist.
+Als Viertes beschreiben wir, wie sich die beiden Arten von Nebenbedingungen in bestehende Heuristiken zur Untergruppenerkennung integrieren lassen.
+Als Fünftes werten wir SMT-Löser-basierte und heuristische Methoden zur Untergruppenerkennung empirisch aus.
+Wir beobachten, dass heuristische Suchmethoden nicht nur schnell sind, sondern auch Untergruppen mit hoher Qualität liefern, selbst wenn beide Arten von Nebenbedingungen berücksichtigt werden.

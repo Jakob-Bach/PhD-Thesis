@@ -1,0 +1,68 @@
+%\definecolor{kitblue}{RGB}{70, 100, 170}
+
+% formatting inspired by "moderncv" and https://github.com/edouardfouche/phd-thesis/blob/master/cv.tex
+
+\newlength{\hintscolumnwidth}
+\setlength{\hintscolumnwidth}{3.3cm}
+
+\newlength{\separatorcolumnwidth}
+\setlength{\separatorcolumnwidth}{0.5cm}
+
+\newlength{\additionalwidth}
+\setlength{\additionalwidth}{1cm}
+
+\newlength{\maincolumnwidth}
+\setlength{\maincolumnwidth}{\textwidth-\separatorcolumnwidth-\hintscolumnwidth-12pt} % in dissertation, box is 12pt too wide if \textwidth used
+
+\newcommand*{\cventry}[4]{%
+	\noindent%
+	\parbox[t]{\hintscolumnwidth}{\raggedleft{}#1}%
+	\hspace{\separatorcolumnwidth}%
+	\parbox[t]{\maincolumnwidth}{%
+		\textbf{#2}%
+		\ifthenelse{\equal{#2}{} \OR \equal{#3}{}}{}{, }\emph{#3}%
+		\ifthenelse{\equal{#3}{} \OR \equal{#4}{}}{}{, }{#4}%
+	}%
+}
+
+\newcommand*{\cvsection}[1]{%
+	\vspace{\baselineskip}%
+	\noindent%
+	\parbox[m]{\maincolumnwidth}{\large\textsc{#1}}%
+}
+
+\chapter*{Lebenslauf}
+\addcontentsline{toc}{chapter}{Lebenslauf} % entry for table of contents in dissertation (not relevant in standalone version of document)
+
+\cvsection{Persönliche Daten}
+
+\cventry{Name}{}{}{Vorname Nachname}
+
+\cventry{Geboren}{}{}{xx.yy.zzzz in aaa}
+
+\cventry{Adresse}{}{}{aaa}
+
+\cventry{E-Mail}{}{}{xxx@yyy.zzz}
+
+\cvsection{Berufserfahrung}
+
+\cventry{yy/zzzz -- yy/zzzz}{Berufsbezeichnung}{Arbeitgeber}{Standort}
+
+\dots % add further jobs here
+
+\cvsection{Bildung}
+
+\cventry{yy/zzzz -- heute}{Studiengang (Promotion)}{Universität}{}
+
+\cventry{yy/zzzz -- yy/zzzz}{Studiengang (M.Sc.)}{Universität}{Abschlussnote: x,x}
+
+\cventry{yy/zzzz -- yy/zzzz}{Studiengang (B.Sc.)}{Universität}{Abschlussnote: x,x}
+
+\vspace{2\baselineskip}
+
+\noindent Ort, yy. Monat zzzz
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Vorname Nachname}
+

@@ -1,0 +1,411 @@
+\chapter{Fundamentals}
+\label{sec:fundamentals}
+
+In this section, we introduce relevant fundamentals of feature selection (cf.~Section~\ref{sec:fundamentals:feature-selection}) and subgroup discovery (cf.~Section~\ref{sec:fundamentals:subgroup-discovery}).
+
+\paragraph{Notation}
+
+We focus on tabular, real-valued data.
+In particular, $X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
+Each row is a data object, and each column is a feature.
+$\tilde{F} = \{f_1, \dots, f_n\}$ is the corresponding set of feature names.
+We assume that categorical features have been made numeric, e.g., via a one-hot or an ordinal encoding~\cite{matteucci2023benchmark}.
+$X_{i \cdot} \in \mathbb{R}^n$ denotes the values of all features for the $i$-th data object,
+while $X_{\cdot j} \in \mathbb{R}^m$ denotes the values of the $j$-th feature for all data objects.
+We consider supervised-learning scenarios.
+In particular, the vector $y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
+The function $Q(\cdot)$ returns the quality of a feature set or subgroup; we will define its corresponding arguments later.
+
+\section{Feature Selection}
+\label{sec:fundamentals:feature-selection}
+
+In this section, we introduce relevant fundamentals of feature selection:
+the optimization problem (cf.~Section~\ref{sec:fundamentals:feature-selection:problem}) and feature-selection methods (cf.~Section~\ref{sec:fundamentals:feature-selection:methods}).
+
+\subsection{Problem}
+\label{sec:fundamentals:feature-selection:problem}
+
+Feature selection makes a binary decision $s_j \in \{0,1\}$ for each feature, i.e., either selects it or not.
+The vector $s \in \{0,1\}^n$ combines all these selection decisions and yields the selected feature set $F_s = \{f_j \mid s_j=1\} \subseteq \tilde{F}$.
+To simplify notation, we drop the subscript~$s$ in definitions where we do not explicitly refer to the value of~$s$ but only the set~$F$.
+The function $Q(s,X,y)$ returns the quality of such a feature set and depends on the feature-selection method.
+Without loss of generality, we assume that this function should be maximized:
+%
+\begin{definition}[Feature selection]
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in Y^m$,
+	\emph{feature selection} is the problem of making feature-selection decisions~$s \in \{0,1\}^n$ that maximize a given notion of feature-set quality~$Q(s,X,y)$.
+	\label{def:fs:feature-selection}
+\end{definition}
+
+Additionally, the user often defines a parameter $k \in \mathbb{N}$ denoting the exact or maximal number of selected features, i.e., the \emph{cardinality} of the feature set.
+
+\subsection{Methods}
+\label{sec:fundamentals:feature-selection:methods}
+
+There are different ways to define feature-set quality $Q(s,X,y)$.
+We only give a short overview and provide details for the methods we use in this dissertation. See~\cite{agrawal2021metaheuristic, chandrashekar2014survey, dhal2021comprehensive, li2017feature, njoku2023wrapper} for comprehensive studies and surveys of feature selection.
+Feature-selection methods are typically categorized into filter, wrapper, and embedded methods~\cite{guyon2003introduction}.
+
+\subsubsection{Filter Methods}
+\label{sec:fundamentals:feature-selection:methods:filter}
+
+Filter feature selection evaluates the quality $Q(s,X,y)$ without training a prediction model.
+Univariate filters assess each feature's relevance independently.
+Multivariate filters also consider relationships between features.
+They often combine a measure of univariate feature relevance with a measure of bivariate feature redundancy.
+Some filter methods also consider feature intercooperation, i.e., the joint relevance of two or more features~\cite{sosa2024feature}.
+
+\paragraph{Univariate filter methods}
+
+Univariate filter methods break $Q(s,X,y)$ down to the qualities $q_j = q(X_{\cdot{}j},y)$ of individual features.
+$q(\cdot)$ is a bivariate dependency measure to quantify the relationship between each feature and the prediction target, e.g., mutual information~\cite{kraskov2004estimating} or the absolute value of Pearson correlation.
+The overall optimization objective is an aggregate of the selected features' qualities, typically their sum:
+%
+\begin{equation}
+	\max_s \quad Q_{\text{uni}}(s,X,y) = \sum_{j=1}^{n} q(X_{\cdot{}j},y) \cdot s_j = \sum_{j=1}^{n} q_j \cdot s_j
+	\label{eq:fs:univariate-filter}
+\end{equation}
+%
+This objective is cheap to compute but ignores interactions between features.
+The optimal feature set of size~$k \in \mathbb{N}$ consists of the features with the $k$ highest individual qualities.
+
+\paragraph{FCBF}
+
+The Fast Correlation-Based Filter (FCBF)~\cite{yu2003feature} is a multivariate filter method that bases on the notion of predominance:
+Each selected feature's correlation with the prediction target must exceed (1) a user-defined threshold and (2) the correlation of each other selected feature with the given one.
+The first criterion ensures feature relevance, and the second criterion reduces feature redundancy.
+\cite{yu2003feature} proposes a search algorithm to find a set of such predominant features.
+
+\paragraph{mRMR}
+
+Minimal Redundancy Maximal Relevance (mRMR)~\cite{peng2005feature} is a multivariate filter method that combines feature relevance and feature redundancy in one objective.
+Relevance corresponds to the dependency between features and the prediction target, which should be maximized, as for univariate filters.
+Redundancy, in turn, corresponds to the dependency between features, which should be minimized.
+Both terms are averaged over the selected features.
+Using a bivariate dependency measure~$q(\cdot)$, the objective is maximizing the following difference between relevance and redundancy:
+%
+\begin{equation}
+	\max_s \quad Q_{\text{mRMR}}(s,X,y) = \frac{\sum_{j=1}^{n} q(X_{\cdot{}j},y) \cdot s_j}{\sum_{j=1}^{n} s_j} - \frac{\sum_{j_1=1}^{n} \sum_{j_2=1}^{n} q(X_{\cdot{}j_1}, X_{\cdot{}j_2}) \cdot s_{j_1} \cdot s_{j_2}}{(\sum_{j=1}^{n} s_j)^2}
+	\label{eq:fs:mrmr}
+\end{equation}
+
+\subsubsection{Wrapper Methods}
+\label{sec:fundamentals:feature-selection:methods:wrapper}
+
+Wrapper methods~\cite{kohavi1997wrappers} evaluate feature-set quality~$Q(s,X,y)$ by training prediction models with feature sets and measuring prediction quality.
+They employ a generic search strategy to iterate over candidate feature sets, e.g., genetic algorithms~\cite{agrawal2021metaheuristic}.
+Feature-set quality is a black-box function in this search, i.e., the optimization algorithm only observes the objective's outputs rather than its internal structure.
+On the one hand, the repeated model training makes wrapper methods costly.
+On the other hand, the notion of feature-set quality stems from an actual prediction task rather than a simplified proxy objective.
+
+\subsubsection{Embedded Methods}
+\label{sec:fundamentals:feature-selection:methods:embedded}
+
+Embedded methods train prediction models with built-in feature selection, e.g., decision trees~\cite{breiman1984classification} or random forests~\cite{breiman2001random}.
+Thus, the criterion for feature-set quality is model-specific.
+For example, tree-based models often use information gain or the Gini index to select features for creating the tree's decision nodes during training.
+
+\subsubsection{Post-Hoc Feature-Importance Methods}
+\label{sec:fundamentals:feature-selection:methods:importance}
+
+Apart from conventional feature selection, there are various methods that assess feature importance after training a model.
+These methods range from local explanation methods like LIME~\cite{ribeiro2016should} or SHAP~\cite{lundberg2017unified}, focusing on individual data objects, to global importance methods like permutation importance~\cite{breiman2001random} or SAGE~\cite{covert2020understanding}.
+In particular, assessing feature importance plays a crucial role in the field of machine-learning interpretability~\cite{carvalho2019machine, molnar2020interpretable}.
+
+\section{Subgroup Discovery}
+\label{sec:fundamentals:subgroup-discovery}
+
+In this section, we introduce relevant fundamentals of subgroup discovery:
+the optimization problem (cf.~Section~\ref{sec:fundamentals:subgroup-discovery:problem}) and common heuristic search methods (cf.~Section~\ref{sec:fundamentals:subgroup-discovery:methods}).
+
+\subsection{Problem}
+\label{sec:fundamentals:subgroup-discovery:problem}
+
+In general, subgroup discovery involves finding descriptions of interesting subsets of a dataset~\cite{atzmueller2015subgroup}.
+There are multiple options for the type of dataset, kind of subgroup description, and criterion of interestingness.
+In the following, we formalize the notion of subgroup discovery that we tackle in this dissertation.
+For broader surveys, see~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup}.
+
+\paragraph{Subgroup (description)}
+
+A subgroup description typically comprises a conjunction of conditions on individual features~\cite{meeng2021real}.
+For real-valued data, the conditions constitute intervals.
+Thus, the subgroup description defines a hyperrectangle (cf.~Figure~\ref{fig:csd:exemplary-subgroup}) with a lower and upper bound for each feature.
+The bounds for a feature may also be infinite to leave it unrestricted.
+A data object resides in the subgroup if all its feature values are in the intervals formed by lower and upper bounds:
+%
+\begin{definition}[Subgroup (description)]
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$, a \emph{subgroup} is described by its lower bounds~$\mathit{lb} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$ and upper bounds~$\mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$.
+	Data object $X_{i \cdot}$ is a \emph{member} of this subgroup if $\forall j \in \{1, \dots, n\}:~ \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$.
+	\label{def:csd:subgroup}
+\end{definition}
+%
+While we focus on real-valued data, some subgroup-discovery methods only support categorical data and require continuous features to be discretized~\cite{herrera2011overview, meeng2021real}.
+In this case, the inequality comparisons become equality comparisons against feature values~\cite{atzmueller2015subgroup}.
+
+Throughout this dissertation, we often use the terms \emph{subgroup} and \emph{subgroup description} interchangeably.
+In a more strict sense, the former term denotes the subgroup's members, and the latter denotes the subgroup's bounds~\cite{atzmueller2015subgroup}.
+
+\paragraph{Subgroup discovery}
+
+Subgroup discovery sets the bounds $\mathit{lb}$ and $\mathit{ub}$ to optimize a notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$, i.e., the interestingness of the subgroup.
+To harmonize formalization and evaluation, we focus on binary-classification targets~$y \in \{0,1\}^m$.
+In general, one may also conduct subgroup discovery in multi-class, multi-target, or regression scenarios~\cite{atzmueller2015subgroup}.
+Without loss of generality, we assume a maximization problem:
+%
+\begin{definition}[Subgroup discovery]
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target $y \in \{0, 1\}^m$,
+	\emph{subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$ that maximizes a given notion of subgroup quality $Q(\mathit{lb}, \mathit{ub}, X, y)$.
+	\label{def:csd:subgroup-discovery}
+\end{definition}
+%
+While this definition refers to one subgroup, some methods return a subgroup set~\cite{atzmueller2015subgroup}.
+
+\paragraph{Subgroup quality}
+
+For binary targets, interesting subgroups should typically contain many data objects from one class but few from the other.
+Without loss of generality, we assume that the class with label~`1' is the class of interest, also called \emph{positive} class.
+Weighted Relative Accuracy (WRAcc)~\cite{lavravc1999rule} is a popular metric for subgroup quality~\cite{meeng2021real}:
+%
+\begin{equation}
+	\text{WRAcc} = \frac{m_b}{m} \cdot \left( \frac{m_b^+}{m_b} - \frac{m^+}{m} \right)
+	\label{eq:csd:wracc}
+\end{equation}
+%
+Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the subgroup~$m_b$, and the number of positive data objects in the subgroup~$m_b^+$.
+In particular, WRAcc is the product of two factors:
+$m_b / m$ expresses the generality of the subgroup as the relative frequency of subgroup membership.
+The second factor measures the relative accuracy of the subgroup, i.e., the difference in the relative frequency of the positive class between the subgroup and the whole dataset.
+If the subgroup contains the same fraction of positive data objects as the whole dataset, WRAcc is zero.
+The theoretical maximum and minimum of WRAcc depend on the class frequencies in the dataset.
+In particular, the maximum WRAcc for a dataset equals the product of the relative frequencies of positive and negative data objects in the dataset~\cite{mathonat2021anytime}:
+%
+\begin{equation}
+	\text{WRAcc}_{\text{max}} = \frac{m^+}{m} \cdot \left( 1 - \frac{m^+}{m} \right)
+	\label{eq:csd:wracc-max}
+\end{equation}
+%
+This maximum is reached if all positive data objects are in the subgroup and all negative ones are outside, i.e., $m_b^+ = m_b = m^+$.
+The corresponding value is 0.25 if both classes occur with equal frequency but becomes smaller the more imbalanced the classes are.
+Thus, it makes sense to normalize WRAcc when working with datasets with different class frequencies.
+One option is a max-normalization to the range $[-1, 1]$~\cite{mathonat2021anytime}:
+%
+\begin{equation}
+	\text{nWRAcc} = \frac{\text{WRAcc}}{\text{WRAcc}_{\text{max}}} = \frac{m_b^+ \cdot m - m^+ \cdot m_b}{m^+ \cdot (m - m^+)}
+	\label{eq:csd:wracc-normalized}
+\end{equation}
+%
+Alternatively, one can also min-max-normalize the range to~$[0, 1]$~\cite{carmona2018unifying, ventura2018subgroup}.
+
+\subsection{Methods}
+\label{sec:fundamentals:subgroup-discovery:methods}
+
+There are heuristic search methods to discover subgroups, like PRIM~\cite{friedman1999bump} and Best Interval~\cite{mampaey2012efficient}, as well as exhaustive search methods, like SD-Map~\cite{atzmueller2009fast, atzmueller2006sd}, MergeSD~\cite{grosskreutz2009subgroup}, and BSD~\cite{lemmerich2016fast, lemmerich2010fast}.
+In this section, we discuss three heuristic search methods that are relevant for Chapter~\ref{sec:csd}; see~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} for comprehensive surveys.
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
+		Prediction target~$y \in \{0, 1\}^m$, \newline
+		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
+		Peeling fraction~$\alpha \in (0, 1)$, \newline
+		Support threshold~$\beta_0 \in [0, 1]$
+	}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$}
+	\BlankLine
+	\For(\tcp*[f]{Start with unrestricted subgroup}){$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:prim:line:initialization-start}
+		$(\mathit{lb}^{\text{opt}}_j,~ \mathit{ub}^{\text{opt}}_j) \leftarrow (-\infty, +\infty)$\;
+	}
+	$Q^{\text{opt}} \leftarrow Q(\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}}, X, y)$\;
+	$(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}) \leftarrow (\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}})$\; \label{al:csd:prim:line:initialization-end}
+	\While(\tcp*[f]{Support threshold satisfied}){$\frac{m_b}{m} > \beta_0$}{ \label{al:csd:prim:line:stop} \label{al:csd:prim:iteration-start}
+		$Q^{\text{cand}} \leftarrow -\infty$\;
+		\For{$j \in$ get\_permissible\_feature\_idxs(\dots)}{ \label{al:csd:prim:line:peel-start} \label{al:csd:prim:line:permissible-features}
+			$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{\text{peel}},~ \mathit{ub}^{\text{peel}})$ \tcp*{Try peeling lower bound}
+			$\mathit{lb}_j \leftarrow$ quantile($X_{\cdot j}$, $\mathit{lb}$, $\mathit{ub}$, $\alpha$)\;
+			\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{cand}}$}{
+				$(\mathit{lb}^{\text{cand}}, \mathit{ub}^{\text{cand}}) \leftarrow (\mathit{lb}, \mathit{ub})$\;
+			}
+			$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{\text{peel}},~ \mathit{ub}^{\text{peel}})$ \tcp*{Try peeling upper bound}
+			$\mathit{ub}_j \leftarrow$ quantile($X_{\cdot j}$, $\mathit{lb}$, $\mathit{ub}$, $1-\alpha$)\;
+			\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{cand}}$}{
+				$(\mathit{lb}^{\text{cand}}, \mathit{ub}^{\text{cand}}) \leftarrow (\mathit{lb}, \mathit{ub})$\; \label{al:csd:prim:line:peel-end}
+			}
+		}
+		$(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}) \leftarrow (\mathit{lb}^{\text{cand}}, \mathit{ub}^{\text{cand}})$ \tcp*{Retain best candidate} \label{al:csd:prim:line:best-peel-selection}
+		\If(\tcp*[f]{Update optimum}){$Q(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}, X, y) > Q^{\text{opt}}$}{ \label{al:csd:prim:line:opt-check-start}
+			$Q^{\text{opt}} \leftarrow Q(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}, X, y)$\;
+			$(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb}^{\text{peel}},~ \mathit{ub}^{\text{peel}})$\; \label{al:csd:prim:line:opt-check-end} \label{al:csd:prim:iteration-end}
+		}
+	}
+	$(\mathit{lb}, \mathit{ub}) \leftarrow (\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}})$\; \label{al:csd:prim:line:select-optimal-bounds}
+	\For(\tcp*[f]{Reset non-excluding bounds}){$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:prim:line:bounds-infty-start}
+		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$}
+		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow +\infty$} \label{al:csd:prim:line:bounds-infty-end}
+	}
+	\Return{$\mathit{lb}, \mathit{ub}$}
+	\caption{\emph{PRIM} for subgroup discovery.}
+	\label{al:csd:prim}
+\end{algorithm}
+
+\paragraph{PRIM}
+
+\emph{Patient Rule Induction Method (PRIM)}~\cite{friedman1999bump} is an iterative search algorithm.
+Its basic form consists of a peeling phase and a pasting phase.
+Peeling restricts the bounds of the subgroup iteratively, while pasting expands them.
+Algorithm~\ref{al:csd:prim} outlines the peeling phase for finding one subgroup, which is the flavor of PRIM we consider in this dissertation and denote as \emph{PRIM}.
+Pasting may have little effect on the subgroup quality and is often left out~\cite{arzamasov2021reds}.
+Other extensions of PRIM are bumping~\cite{friedman1999bump, kwakkel2016improving}, which uses bagging of multiple PRIM runs to improve subgroup quality, and covering~\cite{friedman1999bump}, which returns a sequence of subgroups covering different data objects.
+
+The algorithm \emph{PRIM} starts with a subgroup containing all data objects, which is the initial solution candidate (Lines~\ref{al:csd:prim:line:initialization-start}--\ref{al:csd:prim:line:initialization-end}).
+It continues peeling until the current solution candidate contains at most a fraction~$\beta_0$ of data objects (Line~\ref{al:csd:prim:line:stop}).
+The support threshold~$\beta_0 \in [0, 1]$ is a user parameter.
+The returned subgroup is the optimal solution candidate over all peeling iterations (Line~\ref{al:csd:prim:line:select-optimal-bounds}).
+In our \emph{PRIM} implementation, we additionally set \emph{non-excluding bounds} to infinity (Lines~\ref{al:csd:prim:line:bounds-infty-start}--\ref{al:csd:prim:line:bounds-infty-end}).
+These are bounds that do not exclude any data objects from the subgroup, i.e., equal the minimum/maximum feature value over all data objects.
+Thereby, we ensure that these bounds remain non-excluding for any new data and make it easier to see which features are selected in the subgroup description (cf.~Definition~\ref{def:csd:feature-selection}).
+
+In the iterative peeling procedure (Lines~\ref{al:csd:prim:iteration-start}--\ref{al:csd:prim:iteration-end}), the algorithm generates new solution candidates by trying to restrict each \emph{permissible feature} (Lines~\ref{al:csd:prim:line:peel-start}--\ref{al:csd:prim:line:peel-end}).
+By default, each feature is permissible, but the function \emph{get\_permissible\_feature\_idxs(\dots)} will become helpful once we introduce constraints.
+For each Feature~$j$, the algorithm tests a new lower bound at the $\alpha$-quantile of feature values in the subgroup and a new upper bound at the $1-\alpha$-quantile of feature values in the subgroup.
+The peeling fraction $\alpha \in (0, 1)$ is a user parameter.
+It describes which fraction of data objects gets excluded from the subgroup in each peeling iteration.
+Having tested two new bounds for each feature, the algorithm takes the subgroup with the highest associated quality (Line~\ref{al:csd:prim:line:best-peel-selection}) and continues peeling it in the next iteration.
+Further, if this solution candidate improves upon the optimal solution candidate from all prior iterations, it is stored as the new optimum (Lines~\ref{al:csd:prim:line:opt-check-start}--\ref{al:csd:prim:line:opt-check-end}).
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
+		Prediction target~$y \in \{0, 1\}^m$, \newline
+		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
+		Beam width~$w \in \mathbb{N}$
+	}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$}
+	\BlankLine
+	\For(\tcp*[f]{Initialize beam}){$l \leftarrow 1$ \KwTo $w$}{ \label{al:csd:generic-beam-search:line:initialization-start}
+		\For{$j \leftarrow 1$ \KwTo $n$}{
+			$(\mathit{lb}^{(\text{beam, } l)}_j,~ \mathit{ub}^{(\text{beam, } l)}_j) \leftarrow (-\infty, +\infty)$ \tcp*{Unrestricted}
+		}
+		$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true} \tcp*{Subgroup should be updated}
+		$Q^{(l)} \leftarrow Q(\mathit{lb}^{(\text{beam, } l)}, \mathit{ub}^{(\text{beam, } l)}, X, y)$\; \label{al:csd:generic-beam-search:line:initialization-end}
+	}
+	\While(\tcp*[f]{Beam has changed}){$\left( \sum_{l=1}^w \mathit{cand\_has\_changed}^{(l)} \right) > 0$}{ \label{al:csd:generic-beam-search:line:iteration-start} \label{al:csd:generic-beam-search:line:stop}
+		$\mathit{prev\_cand\_changed\_idxs} \leftarrow \{l \mid \mathit{cand\_has\_changed}^{(l)} \}$\;
+		\For(\tcp*[f]{Create temporary solution candidates}){$l \leftarrow 1$ \KwTo $w$}{
+			$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow$ $(\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)})$\;
+			$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{false}\;
+		}
+		\For(\tcp*[f]{Prepare beam updates}){$l \in \mathit{prev\_cand\_changed\_idxs}$}{ \label{al:csd:generic-beam-search:line:update-start}
+			\For{$j \in$ get\_permissible\_feature\_idxs(\dots)}{ \label{al:csd:generic-beam-search:line:permissible-features}
+				evaluate\_subgroup\_updates(\dots) \tcp*{Algorithm~\ref{al:csd:beam-search-subgroup-update} or~\ref{al:csd:best-interval-subgroup-update}} \label{al:csd:generic-beam-search:line:update-end}
+			}
+		}
+		\For(\tcp*[f]{Update beam}){$l \leftarrow 1$ \KwTo $w$}{
+			$(\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)}) \leftarrow$ $(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)})$\; \label{al:csd:generic-beam-search:line:iteration-end}
+		}
+	}
+	$l \leftarrow \arg\max_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Select best subgroup from beam} \label{al:csd:generic-beam-search:line:finalization-start}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)})$\;
+	\For(\tcp*[f]{Reset non-excluding bounds}){$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:generic-beam-search:line:bounds-infty-start}
+		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$}
+		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow +\infty$} \label{al:csd:generic-beam-search:line:bounds-infty-end}
+	}
+	\Return{$\mathit{lb}, \mathit{ub}$}  \label{al:csd:generic-beam-search:line:finalization-end}
+	\caption{Generic beam search for subgroup discovery.}
+	\label{al:csd:generic-beam-search}
+\end{algorithm}
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\KwIn{Parameters and variables from Algorithm~\ref{al:csd:generic-beam-search}}
+	\KwOut{None; modifies variables from Algorithm~\ref{al:csd:generic-beam-search} in-place}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{Next, update lower bound} \label{al:csd:beam-search-subgroup-update:line:lb-start}
+	\For{$b \in $ sort(unique(get\_feature\_values($X$, $j$, $\mathit{lb}^{(\text{beam, } l)}$, $\mathit{ub}^{(\text{beam, } l)}$)))}{
+		$\mathit{lb}_j \leftarrow b$\;
+		\If{$\left( Q(\mathit{lb}, \mathit{ub}, X, y) > \min_{l \in \{1, ..., w\}} Q^{(l)} \right)$ \textbf{and} $(\mathit{lb},~ \mathit{ub}) \notin \{(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \mid l \in \{1, \dots, w\}\}$ }{ \label{al:csd:beam-search-subgroup-update:line:lb-replace-start}
+			$l \leftarrow \arg\min_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Replace worst candidate}
+			$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow (\mathit{lb}, \mathit{ub})$\;
+			$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
+			$Q^{(l)} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\; \label{al:csd:beam-search-subgroup-update:line:lb-replace-end} \label{al:csd:beam-search-subgroup-update:line:lb-end}
+		}
+	}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{Next, update upper bound} \label{al:csd:beam-search-subgroup-update:line:ub-start}
+	\For{$b \in $ sort(unique(get\_feature\_values($X$, $j$, $\mathit{lb}^{(\text{beam, } l)}$, $\mathit{ub}^{(\text{beam, } l)}$)))}{
+		$\mathit{ub}_j \leftarrow b$\;
+		\If{$\left( Q(\mathit{lb}, \mathit{ub}, X, y) > \min_{l \in \{1, ..., w\}} Q^{(l)} \right)$ \textbf{and} $(\mathit{lb},~ \mathit{ub}) \notin \{(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \mid l \in \{1, \dots, w\}\}$ }{ \label{al:csd:beam-search-subgroup-update:line:ub-replace-start}
+			$l \leftarrow \arg\min_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Replace worst candidate}
+			$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow (\mathit{lb}, \mathit{ub})$\;
+			$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
+			$Q^{(l)} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\; \label{al:csd:beam-search-subgroup-update:line:ub-replace-end} \label{al:csd:beam-search-subgroup-update:line:ub-end}
+		}
+	}
+	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Beam Search}.}
+	\label{al:csd:beam-search-subgroup-update}
+\end{algorithm}
+
+\paragraph{Beam Search}
+
+Beam search is a generic search strategy that is also common in subgroup discovery~\cite{atzmueller2005exploiting}.
+It maintains a set of currently best solution candidates, i.e., the beam, which it iteratively updates.
+The number of solution candidates in the beam is a user parameter, i.e., the beam width~$w \in \mathbb{N}$.
+We outline our specific implementation, which we denote as \emph{Beam Search}, in Algorithm~\ref{al:csd:generic-beam-search} combined with Algorithm~\ref{al:csd:beam-search-subgroup-update}.
+It is an adapted version of the beam-search implementation in the Python package \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}.
+
+First, the algorithm \emph{Beam Search} initializes the beam by creating $w$ unrestricted subgroups (Lines~\ref{al:csd:generic-beam-search:line:initialization-start}--\ref{al:csd:generic-beam-search:line:initialization-end}).
+Further, it stores the quality of each of these subgroups.
+Additionally, it records which subgroups changed in the previous iteration (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}--\ref{al:csd:generic-beam-search:line:iteration-end}) of the search.
+In particular, it stops once all subgroups in the beam remain unchanged (Line~\ref{al:csd:generic-beam-search:line:stop}).
+Subsequently, it returns the best subgroup from the beam (Lines~\ref{al:csd:generic-beam-search:line:finalization-start}--\ref{al:csd:generic-beam-search:line:finalization-end}).
+As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity as a post-processing step.
+
+The main loop (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}--\ref{al:csd:generic-beam-search:line:iteration-end}) updates the beam.
+In particular, for each subgroup that changed in the previous iteration, the algorithm creates new solution candidates by attempting to update the bounds of each feature separately (Lines~\ref{al:csd:generic-beam-search:line:update-start}--\ref{al:csd:generic-beam-search:line:update-end}).
+There are different options for this update step.
+Algorithm~\ref{al:csd:beam-search-subgroup-update} outlines the specific update procedure for \emph{Beam Search}, while \emph{Best Interval} uses a slightly different one (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}).
+For \emph{Beam Search}, the procedure tries to refine either the lower bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-start}--\ref{al:csd:beam-search-subgroup-update:line:lb-end}) or the upper bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:ub-start}--\ref{al:csd:beam-search-subgroup-update:line:ub-end}) for a given Feature~$j$.
+In particular, all unique feature values from data objects in the subgroup may act as new bounds.
+Each solution candidate that improves upon the minimum subgroup quality from the beam replaces the corresponding subgroup, unless it already is part of the beam due to another update action (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:lb-replace-end} and~\ref{al:csd:beam-search-subgroup-update:line:ub-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:ub-replace-end}).
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\KwIn{Parameters and variables from Algorithm~\ref{al:csd:generic-beam-search}}
+	\KwOut{None; modifies variables from Algorithm~\ref{al:csd:generic-beam-search} in-place}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{Value at index~$j$ will change}  \label{al:csd:best-interval-subgroup-update:line:main-start}
+	$(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{$(l, r)$ in~\cite{mampaey2012efficient}}
+	$Q^{\text{opt}} \leftarrow Q(\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}}, X, y)$ \tcp*{$\textit{WRAcc}_{\text{max}}$ in~\cite{mampaey2012efficient}}
+	$Q^{\text{temp}} \leftarrow -\infty$ \tcp*{$h_{\text{max}}$ in~\cite{mampaey2012efficient}}
+	$\mathit{lb}^{\text{temp}}_j \leftarrow -\infty$ \tcp*{$t_{\text{max}}$ in~\cite{mampaey2012efficient}}
+	\For{$b \in $ sort(unique(get\_feature\_values($X$, $j$, $\mathit{lb}^{(\text{beam, } l)}$, $\mathit{ub}^{(\text{beam, } l)}$)))}{
+		$\mathit{lb}_j \leftarrow b$\;
+		$\mathit{ub}_j \leftarrow \mathit{ub}^{(\text{beam, } l)}_j$\;
+		\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{temp}}$}{
+			$\mathit{lb}^{\text{temp}}_j \leftarrow b$\;
+			$Q^{\text{temp}} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\;
+		}
+		$\mathit{lb}_j \leftarrow \mathit{lb}^{\text{temp}}_j$\;
+		$\mathit{ub}_j \leftarrow b$\;
+		\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{opt}}$}{
+			$(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb},~ \mathit{ub})$\;
+			$Q^{\text{opt}} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\; \label{al:csd:best-interval-subgroup-update:line:main-end}
+		}
+	}
+	\If{$\left( Q^{\text{opt}} > \min_{l \in \{1, ..., w\}} Q^{(l)} \right)$ \textbf{and} $(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \notin \{(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \mid l \in \{1, \dots, w\}\}$ }{ \label{al:csd:best-interval-subgroup-update:line:replace-start}
+		$l \leftarrow \arg\min_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Replace worst candidate}
+		$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow (\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}})$\;
+		$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
+		$Q^{(l)} \leftarrow Q^{\text{opt}}$\; \label{al:csd:best-interval-subgroup-update:line:replace-end}
+	}
+	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Best Interval}.}
+	\label{al:csd:best-interval-subgroup-update}
+\end{algorithm}
+
+\paragraph{Best Interval}
+
+\emph{Best Interval}~\cite{mampaey2012efficient} offers an update procedure for subgroups (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}) that is tailored towards WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function.
+This update procedure can be used within a generic beam-search strategy (cf.~Algorithm~\ref{al:csd:generic-beam-search}).
+As before, a solution candidate from an update step becomes part of the beam if it improves upon the worst subgroup quality there and is not a duplicate (Lines~\ref{al:csd:best-interval-subgroup-update:line:replace-start}--\ref{al:csd:best-interval-subgroup-update:line:replace-end} in Algorithm~\ref{al:csd:best-interval-subgroup-update}).
+
+However, solution candidates are generated differently than in the update procedure of \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}).
+In particular, \emph{Best Interval} updates lower and upper bounds for a given Feature~$j$ simultaneously rather than separately (Lines~\ref{al:csd:best-interval-subgroup-update:line:main-start}--\ref{al:csd:best-interval-subgroup-update:line:main-end} in Algorithm~\ref{al:csd:best-interval-subgroup-update}).
+Thus, this procedure optimizes over all potential combinations of lower and upper bounds.
+However, it still only requires one pass over the unique values of Feature~$j$ rather than quadratic cost, as it leverages theoretical properties of the WRAcc function~\cite{mampaey2012efficient}.

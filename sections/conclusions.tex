@@ -1,0 +1,38 @@
+\chapter{Conclusions}
+\label{sec:conclusions}
+
+This dissertation focused on making feature selection more user-centric with the help of constraints.
+In particular, we tackled two research gaps that have not received sufficient attention in the literature before (cf.~Section~\ref{sec:introduction:research-gaps}):
+integrating domain knowledge and finding alternative solutions.
+We addressed these two issues by formulating constraints on the selected feature sets.
+In particular, we made the following contributions:
+
+In Chapter~\ref{sec:syn}, we formally introduced the optimization problem of constrained feature selection.
+Our definition is orthogonal to the user's choice of a feature-selection method, as it retains the method's notion of feature-set quality.
+We proposed using an SMT solver for optimization, which supports a wide range of constraint types.
+Additionally, we systematically evaluated the impact of constraints on feature selection.
+Our comprehensive study generated constraints with varying characteristics and quantified the feature-selection results with multiple evaluation metrics.
+Section~\ref{sec:syn:evaluation:summary} summarizes central results.
+
+In Chapter~\ref{sec:ms}, we applied constrained feature selection in a domain-specific case study.
+We worked with materials scientists to express preferences and scientific hypotheses as constraints.
+Section~\ref{sec:ms:evaluation:summary} summarizes central results.
+
+In Chapter~\ref{sec:afs}, we introduced the optimization problem of alternative feature selection.
+We formalized alternatives via 0-1 integer linear constraints, which are independent of the feature-selection method and allow users to control the number and dissimilarity of alternatives.
+Additionally, we discussed how to combine these constraints with different categories of existing feature-selection methods.
+For a simple notion of feature-set quality, we showed that the optimization problem is $\mathcal{NP}$-hard but a constant-factor approximation exists, for which we proposed corresponding heuristics.
+Finally, we conducted extensive experiments with five feature-selection methods, five search methods for alternatives, and different values of the two user parameters.
+Section~\ref{sec:afs:evaluation:summary} summarizes central results.
+
+In Chapter~\ref{sec:csd}, we analyzed feature-selection-related constraints in subgroup discovery.
+We formalized subgroup discovery as an SMT optimization problem, focusing on two constraint types:
+limiting the number of features used in subgroups and searching for alternative subgroup descriptions.
+Further, we proved $\mathcal{NP}$-hardness of these two constrained optimization problems.
+We also showed how to integrate these constraint types into existing heuristic search methods for subgroup discovery.
+Finally, we evaluated heuristic and solver-based search in four experimental scenarios:
+unconstrained subgroup discovery, our two constraint types, and solver timeouts.
+Section~\ref{sec:csd:evaluation:summary} summarizes central results.
+
+For all contributions, we made our code and experimental data available online (cf.~Section~\ref{sec:introduction:materials}).
+Finally, we will discuss directions for future work in the next chapter.
